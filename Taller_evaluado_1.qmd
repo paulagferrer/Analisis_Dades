@@ -1,0 +1,52 @@
+---
+title: "Taller evaluado I"
+date: "2025-10-15"
+format:
+  html:
+    toc: true
+    toc-depth: 4
+lang: es
+---
+
+**Nombre y apellido de cada miembro del grupo**
+
+* Paula Gª Ferrer
+* Marc Escandell
+
+
+::: {.callout-important title="Artículo a revisar"}
+**PLOS ONE (3 de septiembre de 2025)** — *Smartphone use on the toilet and the risk of hemorrhoids*  
+[Enlace al artículo](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0329983) — DOI: 10.1371/journal.pone.0329983  
+**Datos abiertos:** Harvard Dataverse (DOI: 10.7910/DVN/HUXLUM)
+:::
+<!-- Citas de contexto: artículo, fecha de publicación y dataset abierto. -->
+
+
+#### 1. ¿Cuál es la pregunta de investigación o hipótesis principal? (1 punto)
+
+
+#### 2. Definid: población objetivo, población muestreada, unidad de observación, muestra y tipo de muestreo (2 puntos)
+
+#### 3. Identificad el tipo de estudio, justificad vuestra respuesta (1.5 puntos)
+
+
+#### 4. Indicad al menos tres posibles sesgos y/o factores de confunción que podrían afectar los resultados del estudio (2 puntos)
+
+#### 5. Con base en la Tabla 1 del artículo, interpretad en el contexto del problema las características que resultaron estadísticamente significativas (1.5 puntos)
+
+#### 6. Con base en la Figura 5, discutid si el gráfico empleado es correcto y proponed, en su caso, mejoras que faciliten la interpretación (1 punto)
+
+#### 7. Explica, de forma breve y basada en esta evidencia, si recomendarías evitar o limitar el uso del smartphone en el inodoro a tus amigos (jóvenes menores de 25 años), indicando por qué, cómo (1 punto)
+
+
+<br>
+
+**Instrucciones para entregar:**
+Un miembro del grupo deberá subir a la tarea de Aula Digital un único archivo PDF que incluya:  
+1) los nombres de todos los integrantes, y  
+2) un enlace al repositorio de GitHub (de cualquiera de los integrantes).  
+
+El repositorio deberá contener, como mínimo:  
+- el archivo fuente `.qmd`,  
+- la salida `.html`, y  
+- un `README.md` que describa con claridad el propósito del proyecto y su estructura.
