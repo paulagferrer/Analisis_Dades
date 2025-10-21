@@ -29,6 +29,7 @@ Leemos los datos
 ```{r, message=FALSE}
 ruta<- "C:/Users/Paula García Ferrer/OneDrive/Escritorio/Analsis_Dades_Multi/Analisis_Dades/Taller1/datos_empresa.csv"
 datos_empresa <- read.csv(ruta)
+datos_empresa = datos_empresa[1:15,]
 library(tidyverse)
 glimpse(datos_empresa)
 ```
@@ -90,7 +91,7 @@ media_X <- colMeans(X)
 media_X
 
 # calculamos la matriz de covarianzas
-S <- cov(X)
+S <- cov(X) * (nrow(X) - 1)/nrow(X)
 S
 
 # Media y varianza de Y
@@ -101,6 +102,27 @@ var_Y <- t(a) %*% S %*% a
 cat("Media de Y:", media_Y, "\n")
 cat("Varianza de Y:", var_Y, "\n")
 ```
+
+Según los pesos que hemos atribuido a las variables, podemos ver las
+contribuciones a las medias de manera que la media de la variable
+compuesta $Y$ se puede ver como suma ponderada de las medias:
+$\bar{Y} = a'\bar{X}$, donde $a' = a$.
+
+De esta manera que las contribuciones numéricas quedan:
+
+-    Ventas -\> $0.6  164 = 98,40$ -\>
+    $(98,40 \cdot 100)/media(Y) \approx 91,33 \%$ de la media de Y
+
+-   Publicidad -\> $0.25 \cdot 32,33... = 8,083333...$ -\>
+    $(8,08333... \cdot 100)/media(Y) \approx 7,50 \%$ de la media de Y
+
+-   Satisfaccion_cliente -\> $0.15 \cdot 8,34666... = 1,25199...$ -\>
+    $(1,25199... \cdot 100)/media(Y) \approx 1,16 \%$ de la media de Y
+
+Una interpretación que podemos hacer, es que la media de Y está
+practicamente determinada por las ventas, por una parte porque las
+ventas tienen la media más alta y por otra porque le hemos dado un peso
+mayor, ya que hemos priorizado las ventas.
 
 ### Apartado d
 
@@ -122,4 +144,4 @@ correlaciones entre las variables o si se reescala alguna variable.
 Selecciona la medida de distancia más adecuada para identificar qué
 observaciones multivariantes son similares y cuáles no.
 
-####  Respuesta
+#### Respuesta
