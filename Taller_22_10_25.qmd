@@ -50,7 +50,7 @@ instrucciones en R/tidyverse la matriz de correlaciones. Presenta una
 visualización de ella con la librería `GGally`y la función `ggpairs()`.
 Interpreta el resultado en el contexto del problema.
 
-### Respuesta
+#### Respuesta
 
 ### Apartado c
 
@@ -64,10 +64,10 @@ problema.
 
 #### Respuesta
 
-Consideremos el vector $a$, con los pesos siguientes: Ventas (0.6), ya
-que representa el rendimiento tangible; Publicidad (0.25), es el
-esfuerzo de marketing que impulsa las ventas y Satisfacción (0.15) que
-refleja sostenibilidad futura y reputación. de manera que $$
+Consideremos el vector $a$, con los pesos siguientes: Ventas $(60 \%)$,
+ya que representa el rendimiento tangible; Publicidad $(25 \%)$, es el
+esfuerzo de marketing que impulsa las ventas y Satisfacción $(15 \%)$
+que refleja sostenibilidad futura y reputación. de manera que $$
 a=[0.6, 0.25, 0.15]^t
 $$ Este vector de pesos suma 1 y asigna la prioridad al resultado
 económico. Consideremos ahora la matriz $X$: $$
@@ -104,11 +104,10 @@ cat("Varianza de Y:", var_Y, "\n")
 ```
 
 Según los pesos que hemos atribuido a las variables, podemos ver las
-contribuciones a las medias de manera que la media de la variable
-compuesta $Y$ se puede ver como suma ponderada de las medias:
-$\bar{Y} = a'\bar{X}$, donde $a' = a$.
+contribuciones de las medias a $\bar{Y}$ como suma ponderada de las
+medias: $\bar{Y} = a'\bar{X}$, donde $a' = a$.
 
-De esta manera que las contribuciones numéricas quedan:
+De esta manera las contribuciones quedan:
 
 -    Ventas -\> $0.6  164 = 98,40$ -\>
     $(98,40 \cdot 100)/media(Y) \approx 91,33 \%$ de la media de Y
@@ -122,7 +121,56 @@ De esta manera que las contribuciones numéricas quedan:
 Una interpretación que podemos hacer, es que la media de Y está
 practicamente determinada por las ventas, por una parte porque las
 ventas tienen la media más alta y por otra porque le hemos dado un peso
-mayor, ya que hemos priorizado las ventas.
+mayor, es decir, una mayor prioridad.
+
+Veamos como se comporta nuestra matriz de correlaciones $R$,
+
+```{r}
+R <- cor(X)
+R
+library(GGally)
+ggpairs(X)
+```
+
+$Cor(Ventas, Publicidad) = 0.987$ -\> correlación muy fuerte y
+positiva.\
+Los productos con mayor inversión en publicidad tienden a tener muchas
+más ventas.\
+El valor es tan alto que sugiere la publicidad impulsa directamente las
+ventas.
+
+$Cor(Ventas, Satisfacción\_cliente) = 0.950$ -\> correlación muy fuerte
+y positiva.\
+Los productos con clientes más satisfechos también logran mayores
+ventas.\
+La satisfacción influye significativamente en las ventas, probablemente
+porque los clientes recomiendan o repiten la compra.
+
+$Cor(Publicidad, Satisfacción\_cliente) = 0.960$ -\> correlación muy
+fuerte y positiva.\
+Indica que los productos que reciben más inversión publicitaria suelen
+tener clientes más satisfechos.\
+Podría deberse a que una buena campaña publicitaria refuerza la
+percepción del producto, o que en productos ya conocidos y queridos, la
+empresa fomenta más su compra o adquisición con publicidad.
+
+Las tres variables están muy fuertemente correlacionadas positivamente,
+con $p-valor <0.001$. Esto puede significar que los esfuerzos en
+marketing y la experiencia del cliente están estrechamente vinculados al
+éxito en ventas.
+
+Sin embargo, también implica que estas variables aportan información muy
+similar (hay redundancia). Cuando dos o más variables tienen
+correlaciones muy altas (cercanas a 1), eso quiere decir que se mueven
+casi al mismo tiempo y en la misma dirección.
+
+Estas correlaciones son tan altas que, si conoces el valor de una
+variable (por ejemplo, publicidad), podríamos predecir las otras (ventas
+y satisfacción). Por tanto, no te están dando “nueva” información, sino
+prácticamente la misma, desde distintas perspectivas.
+
+Entonces, tiene sentido el crear esta variable $Y = Xa$, que nos resume
+la información de las tres variables en una sola medida.
 
 ### Apartado d
 
