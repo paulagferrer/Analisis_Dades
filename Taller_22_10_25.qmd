@@ -118,7 +118,7 @@ De esta manera las contribuciones quedan:
 -   Satisfaccion_cliente -\> $0.15 \cdot 8,34666... = 1,25199...$ –-\>
     $(1,25199... \cdot 100)/media(Y) \approx 1,16 \%$ de la media de Y
 
-Una interpretación que podemos hacer, es que la media de Y está
+Una interpretación que podemos hacer, es que la media de $Y$ está
 practicamente determinada por las ventas, por una parte porque las
 ventas tienen la media más alta y por otra porque le hemos dado un peso
 mayor, es decir, una mayor prioridad.
