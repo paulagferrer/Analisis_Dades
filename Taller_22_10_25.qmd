@@ -91,7 +91,7 @@ media_X <- colMeans(X)
 media_X
 
 # calculamos la matriz de covarianzas
-S <- cov(X) * (nrow(X) - 1)/nrow(X)
+S <- cov(X) #no hay que hacer el arreglo *(nrow(X) - 1)/nrow(X)
 S
 
 # Media y varianza de Y
@@ -154,3 +154,13 @@ Selecciona la medida de distancia más adecuada para identificar qué
 observaciones multivariantes son similares y cuáles no.
 
 #### Respuesta
+
+```{r}
+d2 <- stats::mahalanobis(X, center = colMeans(X), cov = cov(X))
+d <- sqrt(d2)
+
+D <- as.matrix(dist(d, method = "euclidean"))
+labs <-paste0("P", seq_len(nrow(D)))
+
+
+```
