@@ -67,13 +67,13 @@ problema.
 Consideremos el vector $a$, con los pesos siguientes: Ventas $(60 \%)$,
 ya que representa el rendimiento tangible; Publicidad $(25 \%)$, es el
 esfuerzo de marketing que impulsa las ventas y Satisfacción $(15 \%)$
-que refleja sostenibilidad futura y reputación. de manera que $$
-a=[0.6, 0.25, 0.15]^t
+que refleja sostenibilidad futura y reputación de manera que: $$
+a=[0.6 \quad  0.25 \quad 0.15]^t
 $$ Este vector de pesos suma 1 y asigna la prioridad al resultado
 económico. Consideremos ahora la matriz $X$: $$
 X = [Ventas \quad Publicidad \quad Satisfacion\_cliente]
 $$ Entonces, la varible $Y=Xa$ será: $$
-Y = Xa = 0.6*Ventas + 0.25*Publicidad + 0.15*Satisfacion\_cliente
+Y = Xa = 0.6 \cdot Ventas + 0.25 \cdot Publicidad + 0.15 \cdot Satisfacion\_cliente
 $$ Veamos en R:
 
 ```{r, message=FALSE}
@@ -109,13 +109,13 @@ medias: $\bar{Y} = a'\bar{X}$, donde $a' = a$.
 
 De esta manera las contribuciones quedan:
 
--    Ventas -\> $0.6  164 = 98,40$ -\>
+-   Ventas -\> $0.6 \cdot 164 = 98,40$ ---\>
     $(98,40 \cdot 100)/media(Y) \approx 91,33 \%$ de la media de Y
 
--   Publicidad -\> $0.25 \cdot 32,33... = 8,083333...$ -\>
+-   Publicidad -\> $0.25 \cdot 32,33... = 8,083333...$ -–\>
     $(8,08333... \cdot 100)/media(Y) \approx 7,50 \%$ de la media de Y
 
--   Satisfaccion_cliente -\> $0.15 \cdot 8,34666... = 1,25199...$ -\>
+-   Satisfaccion_cliente -\> $0.15 \cdot 8,34666... = 1,25199...$ –-\>
     $(1,25199... \cdot 100)/media(Y) \approx 1,16 \%$ de la media de Y
 
 Una interpretación que podemos hacer, es que la media de Y está
@@ -123,54 +123,15 @@ practicamente determinada por las ventas, por una parte porque las
 ventas tienen la media más alta y por otra porque le hemos dado un peso
 mayor, es decir, una mayor prioridad.
 
-Veamos como se comporta nuestra matriz de correlaciones $R$,
+De la expresión $Var(Y) = a^tSa$, podemos ver que es $Var(Y)$ es una
+forma cuadrática con la matriz de covarianzas. Al ser el término mayor
+de $a$ el que acompaña las Ventas, eso quiere decir que la varianza de
+las ventas tiene más peso que la varianza y las covarianzas del resto de
+variables.
 
-```{r}
-R <- cor(X)
-R
-library(GGally)
-ggpairs(X)
-```
-
-$Cor(Ventas, Publicidad) = 0.987$ -\> correlación muy fuerte y
-positiva.\
-Los productos con mayor inversión en publicidad tienden a tener muchas
-más ventas.\
-El valor es tan alto que sugiere la publicidad impulsa directamente las
-ventas.
-
-$Cor(Ventas, Satisfacción\_cliente) = 0.950$ -\> correlación muy fuerte
-y positiva.\
-Los productos con clientes más satisfechos también logran mayores
-ventas.\
-La satisfacción influye significativamente en las ventas, probablemente
-porque los clientes recomiendan o repiten la compra.
-
-$Cor(Publicidad, Satisfacción\_cliente) = 0.960$ -\> correlación muy
-fuerte y positiva.\
-Indica que los productos que reciben más inversión publicitaria suelen
-tener clientes más satisfechos.\
-Podría deberse a que una buena campaña publicitaria refuerza la
-percepción del producto, o que en productos ya conocidos y queridos, la
-empresa fomenta más su compra o adquisición con publicidad.
-
-Las tres variables están muy fuertemente correlacionadas positivamente,
-con $p-valor <0.001$. Esto puede significar que los esfuerzos en
-marketing y la experiencia del cliente están estrechamente vinculados al
-éxito en ventas.
-
-Sin embargo, también implica que estas variables aportan información muy
-similar (hay redundancia). Cuando dos o más variables tienen
-correlaciones muy altas (cercanas a 1), eso quiere decir que se mueven
-casi al mismo tiempo y en la misma dirección.
-
-Estas correlaciones son tan altas que, si conoces el valor de una
-variable (por ejemplo, publicidad), podríamos predecir las otras (ventas
-y satisfacción). Por tanto, no te están dando “nueva” información, sino
-prácticamente la misma, desde distintas perspectivas.
-
-Entonces, tiene sentido el crear esta variable $Y = Xa$, que nos resume
-la información de las tres variables en una sola medida.
+Por lo tanto, el hecho de priorizar las ventas a la hora de definir el
+vector de ponderación $a$ implica que las ventas también tienen más peso
+a la hora de determinar la media y la varianza de $Y$.
 
 ### Apartado d
 
