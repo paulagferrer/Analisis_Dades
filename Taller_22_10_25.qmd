@@ -216,7 +216,8 @@ a la hora de determinar la media y la varianza de $Y$.
 
 *Respuesta Irene:*
 
-```{r} a_rend <- c(0.6, 0.1, 0.3)   Y <- X %*% a_rend mean_rend <- x_bar_t %*% a_rend mean_rend  var_rend  <- t(a_rend) %*% S %*% a_rend var_rend}
+```{r}
+a_rend <- c(0.6, 0.1, 0.3)   Y <- X %*% a_rend mean_rend <- x_bar_t %*% a_rend mean_rend  var_rend  <- t(a_rend) %*% S %*% a_rend var_rend
 ```
 
 *Interpretación:* El resultado indica que el nivel medio de este

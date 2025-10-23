@@ -11,7 +11,7 @@ editor:
     wrap: 72
 ---
 
-**Nombre y apellido de cada miembro del grupo**
+**Nombre y apellido de cada miembro del grupo (soluciones)**
 
 -   Paula Gª Ferrer
 -   Marc Escandell
