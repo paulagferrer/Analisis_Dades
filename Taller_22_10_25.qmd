@@ -27,7 +27,7 @@ empresa](https://github.com/igmuib/Practica_AD/blob/main/datos_empresa.csv)
 Leemos los datos
 
 ```{r, message=FALSE}
-ruta<- "C:/Users/Paula García Ferrer/OneDrive/Escritorio/Analsis_Dades_Multi/Analisis_Dades/Taller1/datos_empresa.csv"
+ruta<- "C:/Users/Paula García Ferrer/OneDrive/Escritorio/Analsis_Dades_Multi/Analisis_Dades/Tallers/datos_empresa.csv"
 datos_empresa <- read.csv(ruta)
 datos_empresa = datos_empresa[1:15,]
 library(tidyverse)
@@ -41,12 +41,11 @@ instrucciones en R/tidyverse, el vector de medias y la matriz de
 covarianzas para las variables cuantitativas del conjunto datos_empresa.
 A continuación, interpreta los resultados en el contexto del problema.
 
-#### Respuesta 
+#### Respuesta
 
 *Respuesta Irene:* En primer lugar creamos la matriz de datos con las
 variables cuantitativas y luego, vamos calculando e interpretando cada
-una de las
-cosas.
+una de las cosas.
 
 ```{r}
 datos_empresa <- datos_empresa %>% 
@@ -122,8 +121,7 @@ X %>%cor()
 
 *Interpretación:* Las tres variables están muy fuertemente
 correlacionadas entre sí: Ventas–Publicidad ≈ 0.99, Ventas–Satisfacción
-≈
-0.95 y Publicidad–Satisfacción ≈ 0.96. Cuando un producto invierte más
+≈ 0.95 y Publicidad–Satisfacción ≈ 0.96. Cuando un producto invierte más
 en publicidad, suele vender bastante más, y los productos con mayor
 satisfacción de clientes también tienden a vender más. En términos
 prácticos, el portafolio se comporta casi “en línea recta”: cambios en
@@ -217,7 +215,12 @@ a la hora de determinar la media y la varianza de $Y$.
 *Respuesta Irene:*
 
 ```{r}
-a_rend <- c(0.6, 0.1, 0.3)   Y <- X %*% a_rend mean_rend <- x_bar_t %*% a_rend mean_rend  var_rend  <- t(a_rend) %*% S %*% a_rend var_rend
+a_rend <- c(0.6, 0.1, 0.3)   
+Y <- X %*% a_rend 
+mean_rend <- x_bar_t %*% a_rend 
+mean_rend  
+var_rend  <- t(a_rend) %*% S %*% a_rend 
+var_rend
 ```
 
 *Interpretación:* El resultado indica que el nivel medio de este
@@ -242,13 +245,13 @@ sobre la redundancia y la dispersión de `datos_empresa`.
 dimensión efectiva del subespacio donde viven los datos. El max rang es
 min(n-1,p)=3.
 
-En nuestros datos, aunque el rango algebraico es r=3 ,
-las correlaciones entre Ventas, Publicidad y Satisfacción son
-\~0.95–0.99; por tanto, la dimensión efectiva es ≈1 y existe una alta
-redundancia práctica entre variables. En términos de negocio, la mayor
-parte de la variación se explica por un único factor común
-(desempeño/atractivo del producto); añadir Publicidad o Satisfacción
-aporta poca información nueva sobre Ventas
+En nuestros datos, aunque el rango algebraico es r=3 , las correlaciones
+entre Ventas, Publicidad y Satisfacción son \~0.95–0.99; por tanto, la
+dimensión efectiva es ≈1 y existe una alta redundancia práctica entre
+variables. En términos de negocio, la mayor parte de la variación se
+explica por un único factor común (desempeño/atractivo del producto);
+añadir Publicidad o Satisfacción aporta poca información nueva sobre
+Ventas
 
 ### Apartado e
 

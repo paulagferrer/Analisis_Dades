@@ -75,9 +75,9 @@ prospectivos de los casos particulares
 smartphone en el inodoro) y resultado (hemorroides) se miden en la misma
 ventana temporal; solo establece asociación. Nivel de evidencia es
 media-baja porque es observacional y la asociación que se puede
-establecer entre la
-exposición y la enfermedad depende del tamaño de la muestra que en este
-caso no es muy grande y no es representativa de la población global.
+establecer entre la exposición y la enfermedad depende del tamaño de la
+muestra que en este caso no es muy grande y no es representativa de la
+población global.
 
 #### 4. Indicad al menos tres posibles sesgos y/o factores de confunción que podrían afectar los resultados del estudio (2 puntos)
 
@@ -99,14 +99,8 @@ podria ser causa de que el consentimiento no fue escrito sino hablado.
 *Respuesta Irene:*
 
 -   Sesgo de selección: solo pacientes en cribado colonoscópico.
-
-<!-- -->
-
 -   Sesgo de recuerdo: autorreporte de uso/frecuencia/tiempo con
     smartphone.
-
-<!-- -->
-
 -   Confusión: edad y actividad física difieren entre grupos(p. ej.,
     sedentarismo no captado, hábitos de lectura)
 
