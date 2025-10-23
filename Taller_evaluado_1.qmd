@@ -6,78 +6,198 @@ format:
     toc: true
     toc-depth: 4
 lang: es
+editor: 
+  markdown: 
+    wrap: 72
 ---
 
 **Nombre y apellido de cada miembro del grupo**
 
-* Paula Gª Ferrer
-* Marc Escandell
-
+-   Paula Gª Ferrer
+-   Marc Escandell
 
 ::: {.callout-important title="Artículo a revisar"}
-**PLOS ONE (3 de septiembre de 2025)** — *Smartphone use on the toilet and the risk of hemorrhoids*  
-[Enlace al artículo](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0329983) — DOI: 10.1371/journal.pone.0329983  
+**PLOS ONE (3 de septiembre de 2025)** — *Smartphone use on the toilet
+and the risk of hemorrhoids*\
+[Enlace al
+artículo](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0329983)
+— DOI: 10.1371/journal.pone.0329983\
 **Datos abiertos:** Harvard Dataverse (DOI: 10.7910/DVN/HUXLUM)
 :::
+
 <!-- Citas de contexto: artículo, fecha de publicación y dataset abierto. -->
 
-
 #### 1. ¿Cuál es la pregunta de investigación o hipótesis principal? (1 punto)
-La utilizacion de los telefonos moviles en el retrete esta relacionado con la aparicion de hemorroides? 
 
+La utilizacion de los telefonos moviles en el retrete esta relacionado
+con la aparicion de hemorroides?
+
+*Respuesta Irene:* Está el uso de smartphone en el inodoro asociado con
+mayor presencia de hemorroides en adultos sometidos a colonoscopia de
+cribado?
 
 #### 2. Definid: población objetivo, población muestreada, unidad de observación, muestra y tipo de muestreo (2 puntos)
 
-Poblacion objetivo: Personas adultas 
-Poblacion muestrada: Personas adultas sometidas a colonoscopia de deteccion en el Beth Israel Deaconess Medical Center en las fechas 01/08/2024–15/12/2024
-Unidad de observación: Personas individuales que consideraron
-Muestra:  143 pero 125 completaron la encuesta
-Tipo de muetreo: Muestro no aleatorio, por la seleccion de los individuos y por las fechas seleccionadas.
+Poblacion objetivo: Personas adultas Poblacion muestrada: Personas
+adultas sometidas a colonoscopia de deteccion en el Beth Israel
+Deaconess Medical Center en las fechas 01/08/2024–15/12/2024 Unidad de
+observación: Personas individuales que consideraron Muestra: 143 pero
+125 completaron la encuesta Tipo de muetreo: Muestro no aleatorio, por
+la seleccion de los individuos y por las fechas seleccionadas.
+
+*Respuesta Irene:*
+
+-   Población objetivo: adultos usuarios de smartphone.
+
+-   Población muestreada: adultos sometidos a colonoscopia de cribado en
+    el hospital docente de la Escuela de Medicina de Harvard (EE. UU.)
+    entre 01/08/2024–15/12/2024.
+
+-   Unidad de observación: cada adulto que tenía programada una
+    colonoscopia de cribado en el hospital y que aceptó completar la
+    encuesta.
+
+-   Muestra: n=125 de 143 que fueron invitados a rellenar el
+    cuestionario.
+
+-   Tipo de muestreo: por conveniencia u oportunista ya que eran
+    pacientes programados para colonoscopia de un único hospital y
+    voluntarios.
 
 #### 3. Identificad el tipo de estudio, justificad vuestra respuesta (1.5 puntos)
 
-Tipo de estudio: transversal, porque las personas seleccionas son de una lista de espera para una colonospia y por tanto la informacion se recogio en un solo instante de tiempo sin un estudio retrospectivo ni prospectivos de los casos particulares
+Tipo de estudio: transversal, porque las personas seleccionas son de una
+lista de espera para una colonospia y por tanto la informacion se
+recogio en un solo instante de tiempo sin un estudio retrospectivo ni
+prospectivos de los casos particulares
 
-
+*Respuesta Irene:* Observacional, transversal: exposición (uso de
+smartphone en el inodoro) y resultado (hemorroides) se miden en la misma
+ventana temporal; solo establece asociación. Nivel de evidencia es
+media-baja porque es observacional y la asociación que se puede
+establecer entre la
+exposición y la enfermedad depende del tamaño de la muestra que en este
+caso no es muy grande y no es representativa de la población global.
 
 #### 4. Indicad al menos tres posibles sesgos y/o factores de confunción que podrían afectar los resultados del estudio (2 puntos)
 
-Sesgo de conveniencia: se seleccionaron las fechas 01/08/2024–15/12/2024 por facilidad de obtencion de datos, sin proporcionar un tiempo suficiente para que sea representativo
+Sesgo de conveniencia: se seleccionaron las fechas 01/08/2024–15/12/2024
+por facilidad de obtencion de datos, sin proporcionar un tiempo
+suficiente para que sea representativo
 
-sesgo de cobertura: no han tenido en consideracion los pacientes que no pidieron cita en esas fecha para una colonospia, ni a las personas sin hemorroides pero que utilizan el telefono. Por ejemplo, los pacientes jovenes son menos propensos a ser sometidos a una prueba de colonospia y por tanto no estan siendo representados
+sesgo de cobertura: no han tenido en consideracion los pacientes que no
+pidieron cita en esas fecha para una colonospia, ni a las personas sin
+hemorroides pero que utilizan el telefono. Por ejemplo, los pacientes
+jovenes son menos propensos a ser sometidos a una prueba de colonospia y
+por tanto no estan siendo representados
 
-sesgo de no respuesta: ya que de 143 solo 125 completaron en su totalidad la encuesta y solo se tienen en cuenta estos 125. Puede que los pacientes más graves no quieran participar en la encuesta, que se podria ser causa de que el consentimiento no fue escrito sino hablado.
+sesgo de no respuesta: ya que de 143 solo 125 completaron en su
+totalidad la encuesta y solo se tienen en cuenta estos 125. Puede que
+los pacientes más graves no quieran participar en la encuesta, que se
+podria ser causa de que el consentimiento no fue escrito sino hablado.
+
+*Respuesta Irene:*
+
+-   Sesgo de selección: solo pacientes en cribado colonoscópico.
+
+<!-- -->
+
+-   Sesgo de recuerdo: autorreporte de uso/frecuencia/tiempo con
+    smartphone.
+
+<!-- -->
+
+-   Confusión: edad y actividad física difieren entre grupos(p. ej.,
+    sedentarismo no captado, hábitos de lectura)
 
 #### 5. Con base en la Tabla 1 del artículo, interpretad en el contexto del problema las características que resultaron estadísticamente significativas (1.5 puntos)
 
 Se hicieron contraste de hipotesis viendo:
 
 La edad es una variable muy significativa (p=0.001) del estudio
-Frecuencia del uso prolongado del telefono en el retrete (p<0.001), muy significativo
-Actividad fisica: se aprecia de manera significativa que las personas que no utilizan el telf movil son personas más activas en comparacion a las personas que si utilizan el telf movil en el retrete (p=0.017)
+Frecuencia del uso prolongado del telefono en el retrete (p\<0.001), muy
+significativo Actividad fisica: se aprecia de manera significativa que
+las personas que no utilizan el telf movil son personas más activas en
+comparacion a las personas que si utilizan el telf movil en el retrete
+(p=0.017)
 
-Finalmente, hay dos variables más que se relacionan con la lectura que no sea el telefono movil (p=0.005), y se aprecia que las personas que no utilizan el telefono, leen otros materiales no electronicos en comparacion con los usuarios que si utilizan el telefono en el inodoro. La otra variable es no leer en el inodoro, que los que utilizan el telefono no leen en comparacion con los qie no utilizan el telf.(p<0.001)
+Finalmente, hay dos variables más que se relacionan con la lectura que
+no sea el telefono movil (p=0.005), y se aprecia que las personas que no
+utilizan el telefono, leen otros materiales no electronicos en
+comparacion con los usuarios que si utilizan el telefono en el inodoro.
+La otra variable es no leer en el inodoro, que los que utilizan el
+telefono no leen en comparacion con los qie no utilizan el
+telf.(p\<0.001)
 
+*Respuesta Irene:*
+
+-   Edad: los usuarios de smartphone eran más jóvenes que los no
+    usuarios (55,4 vs 62,1 años; p-valor=0,001).
+
+-   Actividad física (MET/minnutos por semana): menor en usuarios de
+    smartphone en el inodoro (p-valor=0,017).
 
 #### 6. Con base en la Figura 5, discutid si el gráfico empleado es correcto y proponed, en su caso, mejoras que faciliten la interpretación (1 punto)
 
-El tipo de grafico de barras en comparación de porcentajes dificulta la diferencia entre estas proporciones, porque no se aprecia bien cuanta altura de diferencia hay entre variables. Tampoco incluye la respuesta múltiple, porque en un solo uso del inodoro se pueden consultar diferentes medios.
+El tipo de grafico de barras en comparación de porcentajes dificulta la
+diferencia entre estas proporciones, porque no se aprecia bien cuanta
+altura de diferencia hay entre variables. Tampoco incluye la respuesta
+múltiple, porque en un solo uso del inodoro se pueden consultar
+diferentes medios.
 
-Posibles mejoras del gráfico sería un diagrama circular para comparar las áreas.
+Posibles mejoras del gráfico sería un diagrama circular para comparar
+las áreas.
+
+*Respuesta Irene:* El gráfico muestra las actividades con el smartphone
+entre quienes lo usan en el inodoro (p. ej., “news” 54,3%, “social
+media” 44,4%). Es adecuada una barra de proporciones si es respuesta
+múltiple.
+
+Mejoras sugeridas:
+
+-   Indicar número de usuarios y si hubo respuestas múltiples.
+
+-   Ordenar barras por frecuencia e incluir IC del 95% para
+    proporciones.
 
 #### 7. Explica, de forma breve y basada en esta evidencia, si recomendarías evitar o limitar el uso del smartphone en el inodoro a tus amigos (jóvenes menores de 25 años), indicando por qué, cómo (1 punto)
 
-No podriamos recomendar ni desaconsejar el uso del telf en el inodoro, porque hay otras variables confundidoras como la cantidad de fibra consumida por el usuario que como podemos ver en los intervalos de confianza (Figura 4), que podria afectar más.
-Aunque una cosa que si podriamos decir es que el uso muy prolongado del telf puede a la larga, como concluye el estudio, que afecte también en la aparicion de hemorroides. Además, no se tiene en considerancion a los jovenes de 25 años, porque la edad media de los "jovenes" estudiados es de 55,4 años con sd=9.9.
+No podriamos recomendar ni desaconsejar el uso del telf en el inodoro,
+porque hay otras variables confundidoras como la cantidad de fibra
+consumida por el usuario que como podemos ver en los intervalos de
+confianza (Figura 4), que podria afectar más. Aunque una cosa que si
+podriamos decir es que el uso muy prolongado del telf puede a la larga,
+como concluye el estudio, que afecte también en la aparicion de
+hemorroides. Además, no se tiene en considerancion a los jovenes de 25
+años, porque la edad media de los "jovenes" estudiados es de 55,4 años
+con sd=9.9.
+
+*Respuesta Irene:* Sí, tiene sentido advertir, pero sin alarmismo. En
+gente joven el riesgo absoluto de hemorroides es bajo, pero el hábito de
+alargar el tiempo sentado (por scrolleo) y el esfuerzo innecesario
+pueden sumar riesgo con el tiempo.
+
+-   Si lo llevas, pon un límite (p. ej., \<5 min) y evita quedarte
+    sentado “por mirar el móvil”.
+
+-   No hagas esfuerzo: si no hay ganas, levántate y vuelve luego.
+
+-   Cuida la higiene: manos después de tocar el móvil en el baño; no
+    apoyes el teléfono en superficies.
+
+-   Si tienes estreñimiento o antecedentes familiares de problemas,
+    mejor no usarlo en el baño.
 
 <br>
 
-**Instrucciones para entregar:**
-Un miembro del grupo deberá subir a la tarea de Aula Digital un único archivo PDF que incluya:  
-1) los nombres de todos los integrantes, y  
-2) un enlace al repositorio de GitHub (de cualquiera de los integrantes).  
+**Instrucciones para entregar:** Un miembro del grupo deberá subir a la
+tarea de Aula Digital un único archivo PDF que incluya:\
+1) los nombres de todos los integrantes, y\
+2) un enlace al repositorio de GitHub (de cualquiera de los
+integrantes).
 
-El repositorio deberá contener, como mínimo:  
-- el archivo fuente `.qmd`,  
-- la salida `.html`, y  
-- un `README.md` que describa con claridad el propósito del proyecto y su estructura.
+El repositorio deberá contener, como mínimo:\
+- el archivo fuente `.qmd`,\
+- la salida `.html`, y\
+- un `README.md` que describa con claridad el propósito del proyecto y
+su estructura.

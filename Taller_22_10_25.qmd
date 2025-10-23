@@ -41,7 +41,60 @@ instrucciones en R/tidyverse, el vector de medias y la matriz de
 covarianzas para las variables cuantitativas del conjunto datos_empresa.
 A continuación, interpreta los resultados en el contexto del problema.
 
-#### Respuesta
+#### Respuesta 
+
+*Respuesta Irene:* En primer lugar creamos la matriz de datos con las
+variables cuantitativas y luego, vamos calculando e interpretando cada
+una de las
+cosas.
+
+```{r}
+datos_empresa <- datos_empresa %>% 
+  select(-Marca, -Producto)
+
+X <- as.matrix(datos_empresa)
+
+# Forma matricial
+x_bar_t <- (t(matrix(1, nrow = nrow(X), ncol = 1)) %*% X) / nrow(X)
+x_bar_t
+
+## Con R base
+colMeans(X)
+
+## Con tidyverse 
+datos_empresa %>%
+  summarise(across(where(is.numeric), mean))
+```
+
+*Interpretación*: De media, cada producto vende 164 mil unidades,
+destina 32.3 mil euros a publicidad y alcanza una satisfacción media de
+8.35/10, lo que indica un nivel alto de satisfacción del cliente.
+
+```{r}
+# Forma matricial
+n <- nrow(X)
+H <- diag(n) - matrix(1, n, n) / n
+S <- (t(X) %*% H %*% X) / (n - 1)
+S
+
+## Con R base
+cov(X)  # usa 1/(n-1)
+
+## Con tidyverse
+X %>%cov()
+```
+
+*Interpretación:* En estos 15 productos, las ventas muestran una
+varianza grande (822), la publicidad varía de forma moderada (31.7) y la
+satisfacción del cliente cambia poco alrededor del 8.35 (0.374). Las
+covarianzas son positivas: más publicidad se asocia con más ventas
+(159.3), mayor satisfacción también se relaciona con más ventas (16.7)
+y, aunque más débil, un mayor gasto publicitario se vincula ligeramente
+con mejor satisfacción (3.30). Como las magnitudes dependen de las
+unidades (miles de unidades vendidas, miles de euros y escala 1–10),
+para comparar la “fuerza” de estas relaciones es mejor mirar las
+correlaciones; aun así, el mensaje es: invertir más en publicidad y
+mejorar la satisfacción tienden a acompañarse de más ventas.
 
 ### Apartado b
 
@@ -51,6 +104,34 @@ visualización de ella con la librería `GGally`y la función `ggpairs()`.
 Interpreta el resultado en el contexto del problema.
 
 #### Respuesta
+
+*Respuesta Irene:* Vamos a calcularla para las variables cuantitativas
+del conjunto de datos:
+
+```{r}
+# Forma matricial
+D <- diag(sqrt(diag(S)))
+R <- solve(D) %*% S %*% solve(D)
+
+## Con R base
+cor(X)
+
+## Con tidyverse
+X %>%cor()
+```
+
+*Interpretación:* Las tres variables están muy fuertemente
+correlacionadas entre sí: Ventas–Publicidad ≈ 0.99, Ventas–Satisfacción
+≈
+0.95 y Publicidad–Satisfacción ≈ 0.96. Cuando un producto invierte más
+en publicidad, suele vender bastante más, y los productos con mayor
+satisfacción de clientes también tienden a vender más. En términos
+prácticos, el portafolio se comporta casi “en línea recta”: cambios en
+una de estas métricas se acompañan de cambios en las otras dos en la
+misma dirección. Cuidado que: (1) la correlación no implica causalidad
+(puede haber factores comunes como calidad, precio o madurez del
+producto); (2) con relaciones tan altas podría haber multicolinealidad
+en modelos explicativos.
 
 ### Apartado c
 
@@ -133,12 +214,40 @@ Por lo tanto, el hecho de priorizar las ventas a la hora de definir el
 vector de ponderación $a$ implica que las ventas también tienen más peso
 a la hora de determinar la media y la varianza de $Y$.
 
+*Respuesta Irene:*
+
+```{r} a_rend <- c(0.6, 0.1, 0.3)   Y <- X %*% a_rend mean_rend <- x_bar_t %*% a_rend mean_rend  var_rend  <- t(a_rend) %*% S %*% a_rend var_rend}
+```
+
+*Interpretación:* El resultado indica que el nivel medio de este
+rendimiento ponderado para un producto de los 15 es 104.14. La
+desviación típica (aprox 17.93) muestra una disperdión moderada entre
+productos (CV = 17/104.14 = 0.1721 que corresponde a un 17.21%). Dado
+que Ventas domina el peso y las tres variables están muy
+correlacionadas, el índice se moverá casi en paralelo a Ventas:
+productos con altas ventas (y, en menor medida, alta satisfacción)
+obtendrán puntuaciones altas, mientras que la publicidad influye poco en
+el ranking. Si buscamos un índice comparable en unidades, conviene
+tipificar las variables antes de ponderarlas.
+
 ### Apartado d
 
 Usa el teorema de la dimensión para ofrecer una breve interpretación
 sobre la redundancia y la dispersión de `datos_empresa`.
 
 #### Respuesta
+
+*Respuesta Irene:* Xc matriz nxp, n=15, p=3, rang(Xc) =r mide la
+dimensión efectiva del subespacio donde viven los datos. El max rang es
+min(n-1,p)=3.
+
+En nuestros datos, aunque el rango algebraico es r=3 ,
+las correlaciones entre Ventas, Publicidad y Satisfacción son
+\~0.95–0.99; por tanto, la dimensión efectiva es ≈1 y existe una alta
+redundancia práctica entre variables. En términos de negocio, la mayor
+parte de la variación se explica por un único factor común
+(desempeño/atractivo del producto); añadir Publicidad o Satisfacción
+aporta poca información nueva sobre Ventas
 
 ### Apartado e
 
@@ -148,6 +257,38 @@ correlaciones entre las variables o si se reescala alguna variable.
 
 #### Respuesta
 
+*Respuesta Irene:*
+
+**Varianza total tr(S)**: Mide la dispersión agregada sumando cuánto
+varía cada variable por separado (no usa las correlaciones).
+
+```{r}
+traza_X <- sum(diag(S))
+traza_X
+```
+
+La varianza total suma cuánto varía cada variable por separado. No
+incorpora las correlaciones entre variables.
+
+-   **Varianza generalizada**(det(S)):
+
+Mide la dispersión conjunta de las variables: el “volumen” de la nube de
+datos en el espacio multidimensional. Si hay colinealidad fuerte, este
+volumen se hace pequeño; si alguna variable es combinación lineal exacta
+de otras, entonces det(S)=0.
+
+```{r}
+var_total <-det(S)
+var_total
+```
+
+Si aumentan las correlaciones (manteniendo fijas las varianzas), la
+varianza total tr(S) no cambia porque solo depende de las varianzas
+individuales, mientras que la varianza generalizada det(S) disminuye: el
+“volumen” conjunto se aplana. Esto se ve en la descomposición det(S) =
+(productori sigma_i\^2)\*det(R); al crecer las correlaciones, baja y, en
+consecuencia, también lo hace det(S).
+
 ### Apartado f
 
 Selecciona la medida de distancia más adecuada para identificar qué
@@ -155,12 +296,40 @@ observaciones multivariantes son similares y cuáles no.
 
 #### Respuesta
 
+*Respuesta Irene:*
+
+Entre las distancias que hemos dado para variables cuantitativas, la de
+Mahalanobis es la más adecuada para identificar qué observaciones
+multivariantes son similares y cuáles no. Esto se debe a que, a
+diferencia de la euclídea o la de Minkowski, la distancia de Mahalanobis
+tiene en cuenta las correlaciones entre variables y las diferencias de
+escala, es decir, ajusta el espacio de las observaciones según la
+estructura de covarianzas del conjunto de datos. Así, dos observaciones
+pueden parecer alejadas en términos euclídeos pero resultar próximas
+cuando se considera que varían conjuntamente en la misma dirección que
+las variables están correlacionadas.
+
+En este contexto, donde las variables (Ventas, Publicidad y
+Satisfacción) están fuertemente correlacionadas y en distintas unidades,
+la distancia de Mahalanobis es la que mide de forma más realista la
+similitud multivariante entre productos.
+
 ```{r}
-d2 <- stats::mahalanobis(X, center = colMeans(X), cov = cov(X))
-d <- sqrt(d2)
+d2 <- stats::mahalanobis(X, center = colMeans(X), cov = cov(X)) 
+d  <- sqrt(d2)
 
 D <- as.matrix(dist(d, method = "euclidean"))
-labs <-paste0("P", seq_len(nrow(D)))
+labs <- paste0("P", seq_len(nrow(D)))
+rownames(D) <- colnames(D) <- labs
 
+df <- as_tibble(D, rownames = "From") |>
+  pivot_longer(-From, names_to = "To", values_to = "delta_d")
 
+ggplot(df, aes(From, To, fill = delta_d)) +
+  geom_tile() +
+  coord_equal() +
+  labs(title = "Similitud por distancia a la media",
+       x = "", y = "", fill = "|Δ d|") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```

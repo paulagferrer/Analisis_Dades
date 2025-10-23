@@ -1,0 +1,123 @@
+---
+title: "Pre-taller"
+date: "2025-10-08"
+format:
+  html:
+    toc: true
+lang: es
+---
+
+**Hagamos de revisores del artículo:**
+
+::: {.callout-important title="Artículo a revisar"}
+**Cell (30 de marzo de 2023)** — *Sounds emitted by plants under stress*\
+[Enlace al artículo](https://www.cell.com/cell/fulltext/S0092-8674(23)00262-3) — DOI: 10.1016/j.cell.2023.03.009
+:::
+
+**\[15 minutos\] Lee el resumen (texto y gráfico), la introducción y los resultados del artículo para responder a las siguientes preguntas**
+
+*RESPUESTAS DE IRENE:*
+
+#### 1. ¿Cuál es la pregunta de investigación o hipótesis principal?
+
+Las plantas emiten ultrasonidos detectables cuando estan sometidas a estres y esos sonidos contienen informacion para distinguir el tipo y grado de estres (y la especie)
+
+#### 2. Define población objetivo, población muestreada, unidad de observación y muestra, tipo de muestreo.
+
+Poblacion objetivo: plantas sometidas a estres, conjunto de unidade de observacion sobre el que queremos formular conclusiones
+
+Poblacion muestreada: plantas de tomate y tabaco cultivadas para el estudio
+
+Unidad de observacion: cada planta del estudio
+
+Muestreo: Camara acustica (laboratorio) por cada combinacion (especie-tratamiento) Figura 1B 19\<=n\<=51
+
+Invernadero: deshidratacion: 23 plantas de tomate, no reportan las de tabaco.
+
+Tipo de muestreo: No probabilistico -\> las especies y condiciones se seleccionan por edad, disponibilidad y pertenencia experimental
+
+#### 3. Identifica el tipo de estudio y posibles sesgos y/o efecto confundidor.
+
+Tipo de estudio: Casi experimental porque es controlado, hay intervencion pero no hay aleatorizacion de plantas
+
+#### 4. Define los criterios de inclusión/exclusión para este estudio.
+
+Posible confundidor: microvariaciones en luz, sustrato, tamaño planta, posicion en camara o invernadero.
+
+Sesgo medicion: sensiblidad del hardware del ultrasonido y filtros de pre-procesamiento que pueden afectar la deteccion de eventos
+
+Condiciones de camara acustica/invernadero: pueden no capturar toda la complejidad del campo abierto
+
+#### 5. Observa la Figura 1B del artículo (despliega la legenda) ¿qué patrón general observas? ¿Qué indican las barras de error y cómo afectan tu conclusión?. Señala si el gráfico y los test inferenciales son los apropiados.
+
+Inclusion: Plantas sanas de tomates y tabaco cultivadas bajo protocolos controlados. Con edad de 5-8 semanas post-germinacion. Grabaciones con señal valida en el rango (exemple 20-150 kHz)
+
+Exclusion: Plantas dañadas o enfermas antes del tratamiento. Grabaciones con ruido electrico/ambiental excesivo o artefactos que impidan la deteccion fiable
+
+#### 6. Observa la Figura 1E del artículo. ¿Qué información nos da este gráfico? A la luz de las Figuras 1B y 1E, ¿pueden la frecuencia pico y la intensidad de los eventos acústicos, por sí solas, diferenciar especie y tipo de estrés?
+
+Figura 1B: En controles las barras indican casi cero -\> no hay sonidos. En treated las barras son altas -\> el estres dispara las emisiones acusticas. Tomate dry \> tabaco cut \> tomate cut \> tabaco dry
+
+Las barras de error reflejan la variabilidad entre plantas (+/- sd). Si hay algun solapamiento, las grandes diferencias apoyan que el estres aumenta las emisiones ultrasonicas. Además, los valores difieren por tipo de estres y especie, lo que sugiere que podria discriminarse (exemple Tomate dry\>tabaco dry) pero habria
+
+#### 7. Usando los datos de *Tomato–Dry* (Treated, Fig. 1B) —media y barra de error (SEM/SD)— y el tamaño muestral reportado para ese grupo, construye un intervalo de confianza al 95% para la media de clics/hora.
+
+Tomato dry (treated, figura 1b) -\> IC para la media de clics/hora (aplitud) 43-29 = 14 -\> M=7, \bar{x} = 35,4
+
+Si tomamos el peor de los casos n=19 petit, X normal, \bar{x}+- t_n-1(s\~)/sqrt(n) = 35.4+-7
+
+Si X no es normal -\> bootshap. Necesitariamos las medidas tomadas. Supongamos n=19, con datos x1,...,xn
+
+en R tendriamos que hacer:
+
+replicate(1000, mean(sample(datos, 10, replace=true)))
+
+LI = quantile(medias, 0.05)
+
+#### 8. Compara la media de clics/hora entre dos grupos (p. ej., *Tomato–Dry* vs. *Tobacco–Dry*). Plantea $H_0$ y $H_1$ de acuerdo a lo que se observa en la figura 1B. Calcula el p-valor. Interpreta el resultado en el contexto biológico del estudio e indica los supuestos que estás adoptando.
+
+H0 : mu1 = mu2
+
+H1: mu1 \> mu2
+
+x1 -\> nº de clics/hora tomate dry
+
+x2 -\> nº de clics/hora tabaco dry
+
+\bar{x1} =35.4, SE1 = ?, M = qt(0.975,18).SE
+
+SE = 7/2 = 3.5
+
+\bar{x2}=11; amplitud aprox 5 -\> M =qt(0.975,18)SE
+
+-\>SE =5/2=2.5
+
+Entonces, suponiendo que a pesar de que n1=19 y n2=19; comparamos las variantes que a priori parecen diferentes
+
+F = (\~s\^2 x1)/ (\~s \^2 x2) (test de F de Fisher- Snedecor). Como no lo dan explicita, usamos M= t_n-1 ( \~s1 )/sqrt(19)
+
+(\~s1) = 14.53
+
+(\~s2) = 10.37
+
+Asi, F = 1.963
+
+p-valor= Pr(F_n1-1,n2-1 \>= 1.963) = 0.081
+
+Asi, que el t-test seria para diferencia de medias muestras independientes, varianzas iguales (ver apartado 6.12 test apuntes)
+
+T =...=0.008
+
+p-valor= P(T_n1+n2-2 \>= 0.008) = pt(0.008, 36, lower.tail) =0.49
+
+#### 9. La legenda de la Figura 1B, pone: “Todos los grupos tratados emiten significativamente más sonidos que todos los grupos control (test de Wilcoxon con corrección de Bonferroni, $p< e^{-6}$).¿Qué significa exactamente esta afirmación y en qué consiste ese test?
+
+Que al comparar cada grupo tratado (sequia/corte) con cada grupo control (pot, neighbour, self) se rechaza H0 (medianas diferentes -\> medianas de sonidos emitidos). El p-valor\<10\^-16 indica una fuerte evidencia estadistica (no atribuible al azar) Wilcoxon test es un test no parametrico para dos muestras indepes.
+
+Combina todas las observaciones, las ordena por rangos y evalua si los rangos tienden a ser más altos en el grupo tratado. (apuntes 6.1.5, ejemplo 6.8 apuntes mates II)
+
+Por ultimo, la correccion de Bonferroni, apunta el umbral de significacion por multiples comparaciones (para controlar el error tipo I)
+
+<br>
+
+## *Nota: Si falta algún* $n$ utiliza un supuesto razonable (p.ej. usar n como el mínimo del rango 19-51) y discute cómo podría afectar los IC y la potencia.
