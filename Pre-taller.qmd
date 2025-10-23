@@ -1,0 +1,39 @@
+---
+title: "Pre-taller"
+date: "2025-10-08"
+format:
+  html:
+    toc: true
+lang: es
+---
+
+**Hagamos de revisores del artículo:**
+
+::: {.callout-important title="Artículo a revisar"}
+**Cell (30 de marzo de 2023)** — *Sounds emitted by plants under stress*\
+[Enlace al artículo](https://www.cell.com/cell/fulltext/S0092-8674(23)00262-3) — DOI: 10.1016/j.cell.2023.03.009
+:::
+
+**\[15 minutos\] Lee el resumen (texto y gráfico), la introducción y los resultados del artículo para responder a las siguientes preguntas**
+
+#### 1. ¿Cuál es la pregunta de investigación o hipótesis principal?
+
+#### 2. Define población objetivo, población muestreada, unidad de observación y muestra, tipo de muestreo.
+
+#### 3. Identifica el tipo de estudio y posibles sesgos y/o efecto confundidor.
+
+#### 4. Define los criterios de inclusión/exclusión para este estudio.
+
+#### 5. Observa la Figura 1B del artículo (despliega la legenda) ¿qué patrón general observas? ¿Qué indican las barras de error y cómo afectan tu conclusión?. Señala si el gráfico y los test inferenciales son los apropiados.
+
+#### 6. Observa la Figura 1E del artículo. ¿Qué información nos da este gráfico? A la luz de las Figuras 1B y 1E, ¿pueden la frecuencia pico y la intensidad de los eventos acústicos, por sí solas, diferenciar especie y tipo de estrés?
+
+#### 7. Usando los datos de *Tomato–Dry* (Treated, Fig. 1B) —media y barra de error (SEM/SD)— y el tamaño muestral reportado para ese grupo, construye un intervalo de confianza al 95% para la media de clics/hora.
+
+#### 8. Compara la media de clics/hora entre dos grupos (p. ej., *Tomato–Dry* vs. *Tobacco–Dry*). Plantea $H_0$ y $H_1$ de acuerdo a lo que se observa en la figura 1B. Calcula el p-valor. Interpreta el resultado en el contexto biológico del estudio e indica los supuestos que estás adoptando.
+
+#### 9. La legenda de la Figura 1B, pone: “Todos los grupos tratados emiten significativamente más sonidos que todos los grupos control (test de Wilcoxon con corrección de Bonferroni, $p< e^{-6}$).¿Qué significa exactamente esta afirmación y en qué consiste ese test?
+
+<br>
+
+## *Nota: Si falta algún* $n$ utiliza un supuesto razonable (p.ej. usar n como el mínimo del rango 19-51) y discute cómo podría afectar los IC y la potencia.
