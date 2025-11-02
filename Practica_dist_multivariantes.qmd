@@ -104,8 +104,7 @@ La densidad conjunta es\
 
 $$
 f_{X,Y}(x,y)=\tfrac12\phi(y)\delta(y-x)+\tfrac12\phi(y)\delta(y+x),
-$$
-donde $\phi$ es la densidad normal estándar y $\delta$ es la delta de
+$$ donde $\phi$ es la densidad normal estándar y $\delta$ es la delta de
 Dirac.
 
 (Completa los detalles !)
@@ -120,7 +119,32 @@ Dirac.
 Mirar solo las marginales puede ocultar dependencias no lineales o
 multimodales que rompen la normalidad conjunta.
 
+Possible resposta:
+
+Las especias más grandes (como gentoo) presentan mayores logitudes de
+aleta y masa corportal, mientras que Adelie tiende a valores menores.
+Correlacion positiva entre longitud del pico, longitud aleta y masa
+corporal, además de significativas p-valor\<0.001. Destaca que la
+profundidad del pico se comporta de manera diferente, separando especies
+más por su forma que por tamaño general. En los diagramas de dispersión,
+las relaciones parecen aproximadament "lineales". #AÑADIR GRAFICO CORR
+con todas las especies o cada uno por separado
+
+Si consideramos $Y=+-X$, y definimos que $X$ sigue una $N(0,1)$, con
+$S\in \{-1,1\}$ y $P(S=1)=P(S=-1)=1/2$, tendriamos que $Y=SX$. Ahora
+bien, $X, Y$ seguiran una $N(0,1)$, por separado pero la conjunta no
+tiene una función de densidad elíptica, por tanto no habrá normalidad.
+
 ### 2. Interpreta dos términos fuera de la diagonal de $\Sigma$. ¿Qué nos dicen sobre la orientación de las elipses de nivel?
+
+Pos resposta: $\Sigma_{ij} = Cov(X_i,X_j)=A$ son els elements fora de sa
+diagonal. Llavors,
+
+-   Si A\>0, quan una variable creix s'altre tambe
+
+-   A\<0, una creix s'altre baix
+
+-   A=0, no estan correlaciones (no te perque ser indepes)
 
 ### 3. Utiliza las distancias de Mahalanobis para detectar datos atípicos multivariantes. ¿Los puntos señalados como atípicos lo son también en sentido univariante? Compara con boxplots univariantes.
 
@@ -153,6 +177,64 @@ La distancia de Mahalanobis:
 Por eso detecta observaciones que pueden ser normales univariadamente
 pero atípicas al considerar el vector completo.
 
+repsosta: Los conjuntos de igual distancia D\^2=c, son elipses o
+elipsoides. La distancia de Mahalanobis define niveles de densidad
+constante en la normal multivariente. Un punto puede parecer normal
+univariante pero atipico al considerar la combinacion conjunta de
+variables
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+
+# Cargamos los datos y seleccionamos solo las variables numéricas
+pinguinos <- penguins %>%
+  select(species, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g)
+
+# Eliminamos los NA
+pinguinos_complete <- na.omit(pinguinos)
+
+# Calculamos las distancias de Mahalanobis
+mu <- colMeans(pinguinos_complete[, -1])  # sin la especie
+S <- cov(pinguinos_complete[, -1])
+D2 <- mahalanobis(pinguinos_complete[, -1], center = mu, cov = S)
+
+p1<-ncol(pinguinos_complete)
+cutoff <- qchisq(0.95,df=p1)
+outliers<-which(D2>cutoff)
+outliers
+
+
+pinguinos_complete <- pinguinos_complete %>%
+  mutate(D2 = D2)
+
+p <- ncol(pinguinos_complete) - 1  # quitamos la especie
+cutoff <- qchisq(0.95, df = p)
+pinguinos_complete <- pinguinos_complete %>%
+  mutate(atipico = D2 > cutoff)
+
+
+pinguinos_long <- pinguinos_complete %>%
+  select(-D2, -atipico) %>%
+  pivot_longer(
+    cols = where(is.numeric),
+    names_to = "variable",
+    values_to = "valor"
+  )
+
+
+ggplot(pinguinos_long, aes(x = variable, y = valor)) +
+  geom_boxplot(aes(fill = variable)) +
+  theme_minimal() +
+  labs(
+    title = "Boxplots univariantes de las variables morfológicas",
+    x = "Variable",
+    y = "Valor"
+  ) +
+  theme(legend.position = "none")
+
+```
+
 ### 4. Evalúa la normalidad multivariante : tests y QQ-plots. ¿Observas curvaturas sistemáticas (no linealidad global) o solo unos pocos puntos extremos?
 
 En cuanto a los tests, intenta usar la librería: `MVN` prueba "mardia",
@@ -162,6 +244,7 @@ En cuanto al QQ-plot, te dejo un pseudo algoritmo para que lo
 implementes:
 
 ```{r}
+library(MVN)
 #d2 <- mahalanobis(datos, mu, S)
 P <- as.matrix(datosPinguinos)
 # mu vector de medias i S matriz de covariancias
@@ -185,7 +268,71 @@ abline(0, 1, col = "red", lwd = 2)
     outliers multivariantes. En ese caso, vuelve a evaluar la normalidad
     tras excluirlos.
 
+```{r}
+library(MVN)
+library(tidyverse)
+library(palmerpenguins)
+
+# datos
+pinguinos <- penguins %>%
+  select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g) %>%
+  na.omit()
+
+# R ME ODIA
+# Evaluamos la normalidad con los tres tests
+mardia_test  <- mvn(data = pinguinos, mvnTest = "mardia", multivariatePlot = "qq")
+hz_test      <- mvn(data = pinguinos, mvnTest = "hz", multivariatePlot = "qq")
+royston_test <- mvn(data = pinguinos, mvnTest = "royston", multivariatePlot = "qq")
+
+# Mostramos los resultados
+mardia_test$multivariateNormality
+hz_test$multivariateNormality
+royston_test$multivariateNormality
+
+# QQ-plot de distancias de Mahalanobis
+P <- as.matrix(pinguinos)
+mu <- colMeans(P)
+S <- cov(P)
+n <- nrow(P)
+p <- ncol(P)
+
+d2 <- mahalanobis(P, mu, S)
+
+qqplot(qchisq(ppoints(n), df = p), sort(d2),
+       main = "QQ-plot de distancias de Mahalanobis",
+       xlab = expression("Cuantiles teóricos" ~ chi^2[p]),
+       ylab = expression("Distancias de Mahalanobis" ~ D^2))
+abline(0, 1, col = "red", lwd = 2)
+
+```
+
 ### 5. Comparación entre especies: Superpón elipses normales por especie (elige dos variables) y comenta diferencias de centro y forma/orientación:
+
+resposta: Si por ejemplo elegimos (X1,X2) = (long pico, long aleta)
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+
+# Selección de dos variables
+pinguinos <- penguins %>%
+  select(species, bill_length_mm, flipper_length_mm) %>%
+  drop_na()
+
+#  Gráfico con elipses normales por especie
+ggplot(pinguinos, aes(x = bill_length_mm, y = flipper_length_mm, color = species)) +
+  geom_point(alpha = 0.6) +
+  stat_ellipse(type = "norm", level = 0.95, size = 1) +
+  theme_minimal() +
+  labs(
+    title = "Elipses normales (95%) por especie de pingüino",
+    x = "Longitud del pico (mm)",
+    y = "Longitud de la aleta (mm)",
+    color = "Especie"
+  ) +
+  theme(plot.title = element_text(face = "bold", size = 13))
+
+```
 
 ### 6. ¿Parece razonable asumir una $\Sigma$ común entre especies? Justifica con evidencia gráfica.
 
