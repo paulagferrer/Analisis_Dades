@@ -119,8 +119,6 @@ Dirac.
 Mirar solo las marginales puede ocultar dependencias no lineales o
 multimodales que rompen la normalidad conjunta.
 
-
-
 #### Possible resposta:
 
 Las especias más grandes (como gentoo) presentan mayores logitudes de
@@ -135,7 +133,8 @@ con todas las especies o cada uno por separado
 Si consideramos $Y=+-X$, y definimos que $X$ sigue una $N(0,1)$, con
 $S\in \{-1,1\}$ y $P(S=1)=P(S=-1)=1/2$, tendríamos que $Y=SX$.
 
-Veamos que la función de densidad de $Y$ es una normal $N(0,1)$. Para ello, calculemos su función de distribución.
+Veamos que la función de densidad de $Y$ es una normal $N(0,1)$. Para
+ello, calculemos su función de distribución.
 
 $$F_Y(y) = P\{Y \leq y\} = P\{SX \leq y \} = P\{SX \leq y \mid S = 1\}P\{S=1\} + P\{SX \leq y \mid S = -1\}P\{S=-1\}$$
 Donde hemos aplicado el teorema de la probabilidad total. De esta forma,
@@ -143,10 +142,10 @@ Donde hemos aplicado el teorema de la probabilidad total. De esta forma,
 $$F_Y(y) = \frac{1}{2}(P\{X \leq y\} + P\{-X \leq y\}) = \frac{1}{2}(P\{X \leq y\} + 1 - P\{X \leq -y\}) = \frac{1}{2}(F_X(y) + 1 - F_X(-y))$$
 Per tant, derivant l'expressió anterior tenim que:
 
-$$f_Y(y) = \frac{1}{2}(f_X(y) + f_X(-y)) = f_X(y)$$
-Debido a que $X$ sigue una normal estándard y por tanto es simétrica. Por tanto, $Y$ sigue una normal $N(0, 1)$. Ahora bien, el vector conjunto no tiene una función de densidad elíptica, por tanto no habrá normalidad.
-
-
+$$f_Y(y) = \frac{1}{2}(f_X(y) + f_X(-y)) = f_X(y)$$ Debido a que $X$
+sigue una normal estándard y por tanto es simétrica. Por tanto, $Y$
+sigue una normal $N(0, 1)$. Ahora bien, el vector conjunto no tiene una
+función de densidad elíptica, por tanto no habrá normalidad.
 
 ### 2. Interpreta dos términos fuera de la diagonal de $\Sigma$. ¿Qué nos dicen sobre la orientación de las elipses de nivel?
 
