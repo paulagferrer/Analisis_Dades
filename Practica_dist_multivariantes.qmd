@@ -119,7 +119,7 @@ Dirac.
 Mirar solo las marginales puede ocultar dependencias no lineales o
 multimodales que rompen la normalidad conjunta.
 
-#### Possible resposta:
+#### Resposta
 
 Las especias más grandes (como gentoo) presentan mayores logitudes de
 aleta y masa corportal, mientras que Adelie tiende a valores menores.
@@ -146,7 +146,8 @@ Debido a que $X$ sigue una normal estándard y por tanto es simétrica. Por tant
 
 ### 2. Interpreta dos términos fuera de la diagonal de $\Sigma$. ¿Qué nos dicen sobre la orientación de las elipses de nivel?
 
-Pos resposta: $\Sigma_{ij} = Cov(X_i,X_j)=A$ son els elements fora de sa
+#### Resposta
+$\Sigma_{ij} = Cov(X_i,X_j)=A$ son els elements fora de sa
 diagonal. Llavors,
 
 -   Si A\>0, quan una variable creix s'altre tambe
@@ -186,7 +187,9 @@ La distancia de Mahalanobis:
 Por eso detecta observaciones que pueden ser normales univariadamente
 pero atípicas al considerar el vector completo.
 
-repsosta: Los conjuntos de igual distancia D\^2=c, son elipses o
+#### Resposta
+
+Los conjuntos de igual distancia $D^2=c$, son elipses o
 elipsoides. La distancia de Mahalanobis define niveles de densidad
 constante en la normal multivariente. Un punto puede parecer normal
 univariante pero atipico al considerar la combinacion conjunta de
@@ -208,10 +211,10 @@ mu <- colMeans(pinguinos_complete[, -1])  # sin la especie
 S <- cov(pinguinos_complete[, -1])
 D2 <- mahalanobis(pinguinos_complete[, -1], center = mu, cov = S)
 
-p1<-ncol(pinguinos_complete)
-cutoff <- qchisq(0.95,df=p1)
-outliers<-which(D2>cutoff)
-outliers
+# p1<-ncol(pinguinos_complete)
+# cutoff <- qchisq(0.95,df=p1)
+# outliers <- which(D2>cutoff)
+# outliers
 
 
 pinguinos_complete <- pinguinos_complete %>%
@@ -223,16 +226,24 @@ pinguinos_complete <- pinguinos_complete %>%
   mutate(atipico = D2 > cutoff)
 
 
-pinguinos_long <- pinguinos_complete %>%
+# pinguinos_long <- pinguinos_complete %>%
+#   select(-D2, -atipico) %>%
+#   pivot_longer(
+#     cols = where(is.numeric),
+#     names_to = "variable",
+#     values_to = "valor"
+#   )
+
+pinguinos_complete %>% filter(atipico == TRUE)
+
+
+pinguinos_complete %>%
   select(-D2, -atipico) %>%
   pivot_longer(
     cols = where(is.numeric),
     names_to = "variable",
     values_to = "valor"
-  )
-
-
-ggplot(pinguinos_long, aes(x = variable, y = valor)) +
+  ) %>% ggplot(aes(x = variable, y = valor)) +
   geom_boxplot(aes(fill = variable)) +
   theme_minimal() +
   labs(
@@ -240,9 +251,11 @@ ggplot(pinguinos_long, aes(x = variable, y = valor)) +
     x = "Variable",
     y = "Valor"
   ) +
-  theme(legend.position = "none")
+  theme(legend.position = "none") + facet_wrap(~ variable, scales = "free")
 
 ```
+
+Observamos que la distancia de Mahalanobis devuelve datos atípicos multivariantes però en los boxplots no se detectan datos atípicos univariantes.
 
 ### 4. Evalúa la normalidad multivariante : tests y QQ-plots. ¿Observas curvaturas sistemáticas (no linealidad global) o solo unos pocos puntos extremos?
 
@@ -276,6 +289,8 @@ abline(0, 1, col = "red", lwd = 2)
 -   Si hay una curvatura clara o puntos extremos: hay desviaciones o
     outliers multivariantes. En ese caso, vuelve a evaluar la normalidad
     tras excluirlos.
+    
+#### Resposta
 
 ```{r}
 library(MVN)
@@ -289,14 +304,14 @@ pinguinos <- penguins %>%
 
 # R ME ODIA
 # Evaluamos la normalidad con los tres tests
-mardia_test  <- mvn(data = pinguinos, mvnTest = "mardia", multivariatePlot = "qq")
-hz_test      <- mvn(data = pinguinos, mvnTest = "hz", multivariatePlot = "qq")
-royston_test <- mvn(data = pinguinos, mvnTest = "royston", multivariatePlot = "qq")
+mardia_test  <- mvn(data = pinguinos, mvn_test = "mardia")
+hz_test      <- mvn(data = pinguinos, mvn_test = "hz")
+royston_test <- mvn(data = pinguinos, mvn_test = "royston")
 
 # Mostramos los resultados
-mardia_test$multivariateNormality
-hz_test$multivariateNormality
-royston_test$multivariateNormality
+mardia_test$multivariate_normality
+hz_test$multivariate_normality
+royston_test$multivariate_normality
 
 # QQ-plot de distancias de Mahalanobis
 P <- as.matrix(pinguinos)
@@ -317,7 +332,9 @@ abline(0, 1, col = "red", lwd = 2)
 
 ### 5. Comparación entre especies: Superpón elipses normales por especie (elige dos variables) y comenta diferencias de centro y forma/orientación:
 
-resposta: Si por ejemplo elegimos (X1,X2) = (long pico, long aleta)
+#### Resposta
+
+Si por ejemplo elegimos (X1,X2) = (long pico, long aleta)
 
 ```{r}
 library(tidyverse)
