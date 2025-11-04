@@ -119,8 +119,6 @@ Dirac.
 Mirar solo las marginales puede ocultar dependencias no lineales o
 multimodales que rompen la normalidad conjunta.
 
-
-
 #### Possible resposta:
 
 Las especias más grandes (como gentoo) presentan mayores logitudes de
@@ -145,8 +143,6 @@ Per tant, derivant l'expressió anterior tenim que:
 
 $$f_Y(y) = \frac{1}{2}(f_X(y) + f_X(-y)) = f_X(y)$$
 Debido a que $X$ sigue una normal estándard y por tanto es simétrica. Por tanto, $Y$ sigue una normal $N(0, 1)$. Ahora bien, el vector conjunto no tiene una función de densidad elíptica, por tanto no habrá normalidad.
-
-
 
 ### 2. Interpreta dos términos fuera de la diagonal de $\Sigma$. ¿Qué nos dicen sobre la orientación de las elipses de nivel?
 
