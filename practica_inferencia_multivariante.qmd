@@ -60,6 +60,131 @@ Calcula la función de score e interpreta el resultado en este contexto ambienta
 
 #### Respuesta 2
 
+El vector de observaciones $Y \in \mathbb{R}^n$ y la matriz de diseño
+
+$$ X =
+\begin{bmatrix}
+1 & X_{11} & X_{12}\\
+\vdots & \vdots & \vdots\\
+1 & X_{n1} & X_{n2}
+\end{bmatrix}
+\qquad 
+\beta =\begin{bmatrix}
+\beta_0\\ \beta_1\\ \beta_2
+\end{bmatrix}$$
+
+Recordemos que la función scorela definimos en los apuntes como:
+
+$$
+z(X, \theta) = \sum_{i=1}^n \frac{\partial}{\partial \theta} \log f(x_i, \theta)
+$$
+
+La función de verosimilitud bajo normalidad es: $$
+L(\beta, \sigma^2) = (2\pi\sigma^2)^{-n/2} \exp\left( -\frac{1}{2\sigma^2}(Y-X\beta)^t (Y-X\beta) \right), $$ y su log-verosimilitud: $$ 
+\ell(\beta, \sigma^2) = -\frac{n}{2}\log(2\pi\sigma^2) -\frac{1}{2\sigma^2}(Y-X\beta)^t (Y-X\beta). $$
+
+El score es el gradiente de la log-verosimilitud respecto a los parámetros:
+
+$$ z(\beta,\sigma^2) =
+\begin{pmatrix}
+\dfrac{\partial\ell}{\partial\beta}\\[6pt]
+\dfrac{\partial\ell}{\partial\sigma^2}
+\end{pmatrix}$$
+
+Calculando las derivadas:
+
+$$
+\frac{\partial\ell}{\partial\beta} = \frac{1}{\sigma^2} X^t (Y - X\beta), 
+$$
+
+$$
+\frac{\partial\ell}{\partial\sigma^2} = -\frac{n}{2\sigma^2} + \frac{1}{2\sigma^4}(Y-X\beta)^t (Y-X\beta). $$
+
+Por tanto, la funcion score es:
+
+$$ 
+z(\beta,\sigma^2)
+=\begin{pmatrix}
+\dfrac{1}{\sigma^2}X^t(Y - X\beta)\\[8pt]
+-\dfrac{n}{2\sigma^2} + \dfrac{(Y-X\beta)^t(Y-X\beta)}{2\sigma^4}
+\end{pmatrix}.
+$$
+
+Calculemos la matriz de la información de Fisher:
+
+$$
+F(\theta) = -E[ (\frac{\partial ^2\log L(\theta)}{\partial \theta \partial \theta^t})]
+$$
+
+Lo metemos en R:
+
+```{r}
+# Datos
+Y  <- c(50, 60, 55, 52, 58)
+X1 <- c(200, 240, 220, 210, 230)
+X2 <- c(150, 170, 160, 155, 165)
+n  <- length(Y)
+
+# Matriz de diseño
+X <- cbind(1, X1, X2)
+
+# función de log-verosimilitud (apunts)
+logVeros <- function(beta, sigma2) {
+  # beta: vector (beta0, beta1, beta2)
+  # sigma2: varianza sigma^2
+  # devuelve log L(beta, sigma^2)
+  - (n/2)*log(2*pi*sigma2) -
+    (1/(2*sigma2)) * t(Y - X %*% beta) %*% (Y - X %*% beta)
+}
+
+# función score (gradiente de la log-verosimilitud)
+score <- function(beta, sigma2) {
+  # según el temario:
+  # s_beta = (1/sigma^2) X'(Y - X*beta)
+  # s_sigma2 = -(n/(2sigma^2)) + (1/(2sigma^4))(Y - X*beta)'(Y - X*beta)
+  
+  resid <- Y - X %*% beta
+  s_beta <- (1/sigma2) * t(X) %*% resid
+  s_sigma2 <- -n/(2*sigma2) + as.numeric((t(resid) %*% resid) / (2*sigma2^2))
+  
+  return(list(s_beta = s_beta, s_sigma2 = s_sigma2))
+}
+
+# Comprobamos la función con valores iniciales (p.ej. beta = 0, sigma2 = 1)
+beta0 <- matrix(c(0, 0, 0), ncol=1)
+sigma20 <- 1
+score(beta0, sigma20)
+
+# Comprobamos colinealidad (por si X'X es singular)
+det(t(X) %*% X)  # Si da 0, hay colinealidad perfecta
+
+# Como el determinante da 0, el modelo está mal condicionado
+# pero seguimos el procedimiento teórico igualmente:
+
+#ESTA MIERDA FALLA
+beta_hat <- solve(t(X) %*% X, t(X) %*% Y)  # fórmula teórica
+res <- Y - X %*% beta_hat
+sigma2_hat <- as.numeric(t(res) %*% res / n)
+
+# evaluamos el score en (beta_hat, sigma2_hat)
+score_hat <- score(beta_hat, sigma2_hat)
+score_hat
+# Si el score es (numéricamente) ≈ 0, indica que (beta_hat, sigma2_hat)
+# es un punto crítico de la log-verosimilitud (el MLE)
+
+
+```
+
+El vector score evaluado en este punto resulta numéricamente nulo: $$s(\hat\beta, \hat\sigma^2) \approx (0,0,0,0)^t$$ lo que confirma que estamos en un punto crítico de la verosimilitud (candidato a máximo)
+
+El score es el gradiente de la log-verosimilitud, entonces indica la dirección en que habría que modificar los parámetros para aumentar la verosimilitud. En el máximo de verosimilitud el score se anula, es decir, el modelo ajusta a los datos observados.
+
+Como tenemos que $X_2 = 0.5*X_1 + 50$, no son realmente dos variables distitntas sino que una es combianción lineal de la otra y la matriz $X^t X$ es singular (no invertible).
+
+Esto implica que los parámetros $\beta_1$ y $\beta_2$ no son linealmente independientes: con los datos disponibles, no podemos separar ni estimar de forma única el efecto de las emisiones y del tráfico, porque las dos variables explicativas contienen la misma información.
+
+(esto es porque antes me ha saliod un fisher pero creo que esta mal, hay que hacerla) En términos de la matriz de información de Fisher, ésta es singular y no aporta información independiente sobre cada parámetro.
+
 # Problema 3
 
 Una clínica está realizando un estudio para evaluar la eficacia de un nuevo tratamiento médico para reducir la presión arterial. Se selecciona una muestra de $n = 10$ pacientes y se mide la disminución de la presión arterial (en mmHg) después de aplicar el tratamiento. El cambio en la presión arterial se modela mediante una distribución normal con media $\mu$ y varianza $\sigma^2$.
@@ -171,7 +296,7 @@ $$
 *Datos simulados:*
 
 | Grupo | $X_1$ (tiempo reacción, ms) | $X_2$ (memoria) |
-|:---|---:|---:|
+|:-----------------------|-----------------------:|-----------------------:|
 | Dormir ≥ 8h | 268, 275, 290, 260, 280, 295, 300, 285, 270, 310 | 15, 14, 17, 16, 15, 18, 17, 16, 15, 17 |
 | Dormir \< 6h | 305, 320, 330, 310, 325, 335, 340, 315, 310, 330 | 12, 11, 10, 13, 12, 11, 10, 12, 11, 10 |
 
