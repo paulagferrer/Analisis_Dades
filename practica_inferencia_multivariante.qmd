@@ -60,7 +60,7 @@ Calcula la función de score e interpreta el resultado en este contexto ambienta
 
 #### Respuesta 2
 
-El vector de observaciones $Y \in \mathbb{R}^n$ viene relacionada por la matriz $X$ de datos y los parámetros $\beta$ según la relación
+El vector de observaciones $Y \in \mathbb{R}^n$ viene relacionado por la matriz $X$ de datos y los parámetros $\beta$ según la relación
 
 $$
 Y = X \beta + \epsilon= \begin{bmatrix}
@@ -126,11 +126,11 @@ $$
 \end{cases}
 \Rightarrow
 \begin{cases}
-\beta = (X^tX)^{-1}X^tY \\
-\sigma^2 = \dfrac{(Y-X\beta)^t(Y-X\beta)}{n}
+\hat{\beta} = (X^tX)^{-1}X^tY \\
+\hat{\sigma}^2 = \dfrac{(Y-X\beta)^t(Y-X\beta)}{n}
 \end{cases}$$
 
-Por lo que necesitamos que $X^t X$ sea invertible o, equivalentemente, que el rango de $X$ sea máximo.
+Siendo $\hat{\beta}$ i $\hat{\sigma}^2$ los estimadores de máxima verosimilitud. Notamos que necesitamos que $X^t X$ sea invertible o, equivalentemente, que el rango de $X$ sea máximo.
 Lo metemos en R:
 
 ```{r}
@@ -172,21 +172,19 @@ score(beta0, sigma20)
 
 # Comprobamos colinealidad (por si X'X es singular)
 det(t(X) %*% X)  # Si da 0, hay colinealidad perfecta
-
-# Como el determinante da 0, el modelo está mal condicionado
-# pero seguimos el procedimiento teórico igualmente:
-
 ```
-El score es el gradiente de la log-verosimilitud, indica la dirección en que habría que modificar los parámetros para aumentar la verosimilitud. En el máximo de verosimilitud el score se anula, es decir, el modelo ajusta a los datos observados. Ahora bien, este máximo no és único ya que el rango de $X$ no es máximo, ya que de hecho $X_2 = 0.5 \cdot X_1 + 50$.
 
-Ahora bien, debido a esta relación lineal podemos despreciar una de ellas imponiendo que, por ejemplo, $\beta_2 = 0$, ya que el modelo lineal se puede reescribir como $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 = \beta_0 + \beta_2 \cdot 50 + (\beta_1 + 0.5 \cdot \beta_2) X_1$, es decir, que solo dependa linealmente de $X_1$.
+El score es el gradiente de la log-verosimilitud, que indica la dirección en que habría que modificar los parámetros para aumentar la verosimilitud. En el máximo de verosimilitud el score se anula, es decir, el modelo ajusta a los datos observados. Ahora bien, este máximo no és único ya que el rango de $X$ no es máximo, de hecho $X_2 = 0.5 \cdot X_1 + 50$.
 
-Rehaciendo los cálculos obviando $X_2$,
+Ahora bien, debido a esta relación lineal podemos despreciar una de las costantes del modelo imponiendo que, por ejemplo, $\beta_0 = 0$, ya que el modelo lineal se puede reescribir como $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 = \left(\beta_1 - \dfrac{1}{100} \beta_0\right) X_1 + \left(\beta_2 + \dfrac{1}{50}\beta_0\right)X_2$, es decir, dependa linealmente de $X_1$ i $X_2$ sin constantes adicionales.
+
+Rehaciendo los cálculos imponiendo lo mencionado,
 
 ```{r}
-X_red <- X[,-which(colnames(X) == "X2")]
+X_red <- X[, -1]
 
 beta1 <- solve(t(X_red) %*% X_red, t(X_red) %*% Y)
+rownames(beta1) <- c('beta1', 'beta2')
 sigma21 <- as.numeric((t(Y - X_red %*% beta1) %*% (Y - X_red %*% beta1))) / n
 
 beta1
@@ -196,6 +194,8 @@ epsilon <- Y - X_red %*% beta1
 epsilon
 ```
 Como observamos los datos se ajustan bastante bien al modelo lineal, con la varianza del error bastante pequeña respecto a los valores.
+
+En este caso 
 
 
 # Problema 3
