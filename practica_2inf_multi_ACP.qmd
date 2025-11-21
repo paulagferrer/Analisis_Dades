@@ -1,0 +1,214 @@
+---
+title: "Práctica 2 de inferencia multivariante y ACP"
+autor: "Paula G Ferrer, Josep Cifre, Marc Escandell"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+  pdf_document: default
+fontsize: 11pt
+geometry: margin=1in
+embed-resources: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library("tidyverse")
+library("GGally")
+library("MVN")
+```
+
+## Problema 1
+
+En una ciudad se desea comparar los niveles medios conjuntos de dos contaminantes:
+
+$$
+(Y_{1},Y_{2})^\top = (\text{NO}_2,\ \text{PM}_{2.5}),
+$$ donde $\text{NO}_2$ denota dióxido de de nitrógeno, un gas que se genera en procesos de combustión (por ejemplo, del tráfico) y que irrita las vías respiratorias, y (\text{PM}\_{2.5}) representa material particulado fino, formado por partículas de diámetro menor o igual que 2.5 micras, que se originan sobre todo en la combustión de vehículos y pueden llegar profundamente al pulmón e incluso pasar al torrente sanguíneo.
+
+Se distinguen tres tipos de zona:
+
+-   Zona de tráfico intenso (T),
+-   Zona industrial (I),
+-   Zona residencial (R).
+
+Durante un mismo periodo invernal se toman medidas diarias independientes en cada tipo de zona:
+
+-   $n_T$ días en T\
+-   $n_I$ días en I\
+-   $n_R$ días en R
+
+En el día $j$ de la zona $g\in\{T,I,R\}$ se observa el vector
+
+$$
+\mathbf{Y}_{gj} \in \mathbb{R}^2,\qquad \mathbf{Y}_{gj}\sim \mathcal N_2(\boldsymbol\mu_g,\Sigma),
+$$ con la misma matriz de covarianzas $\Sigma$ para las tres zonas e independencia entre todos los días.
+
+Numeramos las $n=n_1+n_2+n_3$ observaciones totales y construimos la matriz de datos
+
+$$
+X\in\mathbb{R}^{n\times 2},
+$$
+
+cuyas filas son los vectores $\mathbf{Y}_{gj}^\top$.
+
+Sea:
+
+-   $Z$ la matriz $n\times 3$ de indicadores de grupo (en la fila de una observación pone un 1 en la columna de su zona y 0 en las demás).
+-   $H = Z (Z^\top Z)^{-1} Z^\top$ la matriz de proyección sobre el subespacio de las medias por grupo.
+-   $J = \frac{1}{n}\mathbf{1}\mathbf{1}^\top$ la matriz de proyección sobre la media global.
+-   $I$ la identidad de tamaño $n$.
+
+Definimos las matrices de “sumas de cuadrados y productos”:
+
+$$
+\begin{aligned}
+B &= X^\top C_B X,\qquad && C_B = H - J \quad\text{(entre-zonas)},\\[2mm]
+W &= X^\top C_W X,\qquad && C_W = I - H \quad\text{(dentro de zonas)}.
+\end{aligned}
+$$
+
+### a. Demuestra que $C_B$ y $C_W$ son simétricas e idempotentes. Luego, calcula sus rangos y justifica que $\operatorname{rango}(C_B)=2$, $\operatorname{rango}(C_W)=n-3$.
+
+#### Respuesta
+
+### b. Demuestra que $W \sim W_2(\Sigma,\ n-3)$. Luego, bajo la hipótesis nula de igualdad de medias demuestra que $B \sim W_2(\Sigma,\ 2)$.
+
+#### Respuesta
+
+### c. Comprueba que $C_B C_W = 0$. Explica qué significa que las matrices “entre-zonas” y “dentro de zonas” sean independientes en este contexto ambiental. Relaciona tu respuesta con la idea de separar variabilidad debida a diferencias entre tipos de zona de la variabilidad día a día dentro de cada zona.
+
+#### Respuesta
+
+## Problema 2
+
+En el siguiente [enlace](https://github.com/igmuib/Practica_AD/blob/main/problema1_ACP.csv) encontraréis datos de España correspondientes al año 2021, organizados en 7 variables: 4 relacionadas con el uso de las tecnologías de la información y la comunicación (TIC) en las empresas, y 3 vinculadas al uso de estas tecnologías por la población y al equipamiento tecnológico de los hogares. Las variables registradas son las siguientes:
+
+`ebroad`: porcentaje de empresas con acceso a Internet de banda ancha.
+
+`esales`: porcentaje de empresas que realizan ventas electrónicas.
+
+`esocmedia`: porcentaje de empresas que utilizan redes sociales.
+
+`eweb`: porcentaje de empresas con sitio web.
+
+`hbroad`: porcentaje de hogares con acceso a Internet de banda ancha.
+
+`hiacc`: porcentaje de hogares con acceso general a Internet, independientemente del tipo de conexión.
+
+`iuse`: porcentaje de individuos que utilizan Internet.
+
+### a. Realizad un análisis exploratorio de los datos, acompañado de un resumen de las observaciones más relevantes en relación con el contexto del problema, para ello crea una variable `region` con los siguientes niveles:
+
+-   Europa Occidental" = c("BE", "FR", "DE", "AT", "NL", "LU", "IE"),
+
+-   Europa del Sur" = c("ES", "IT", "PT", "EL", "CY", "MT"),
+
+-   "Europa del Este" = c("CZ", "BG", "HU", "PL", "RO", "SK"),
+
+-   "Países Nórdicos" = c("DK", "SE", "FI", "NO"),
+
+-   "Países Bálticos" = c("EE", "LV", "LT")
+
+Aseguraos de incluir, un análisis de la matriz de correlaciones.
+
+#### Respuesta
+
+### b. Realizad una reducción del número de variables utilizando un Análisis de Componentes Principales (PCA). Justificad si trabajaréis con la matriz de covarianzas o la de correlaciones, considerando las características de los datos. Evaluad la idoneidad de la reducción propuesta, indicando claramente el criterio empleado para seleccionar el número de componentes principales a retener. Finalmente, interpretad las componentes principales seleccionadas, describiendo qué representan en el contexto de los datos y cómo contribuyen al análisis.
+
+#### Respuesta
+
+## Problema 3
+
+Resolved el ejercicio propuesto como práctica en [la sección 4.10 de los apuntes](https://aprender-uib.github.io/AD/t4_trd.html#mds-no-m%C3%A9trico). Los datos necesarios para este ejercicio se encuentran en la carpeta de Aula Digital, con el nombre: "Datos para el problema 3 de la practica_2inf_multi_ACP)", disponible en la sección "Práctica".
+
+#### Respuesta
+
+## Problema 4
+
+En una ciudad se desea comparar los niveles medios conjuntos de dos contaminantes:
+
+-   $Y_1$ = concentración de $\text{NO}_2$ (µg/m³),
+-   $Y_2$ = concentración de $\text{PM}_{2.5}$ (µg/m³).
+
+Se distinguen tres tipos de zona:
+
+-   Zona de tráfico intenso (T),
+-   Zona industrial (I),
+-   Zona residencial (R).
+
+Durante un periodo invernal se toman medidas diarias independientes en cada tipo de zona:
+
+-   $n_T = 10$ días en T,\
+-   $n_I = 8$ días en I,\
+-   $n_R = 12$ días en R,
+
+para un total de $n = 30$ observaciones.
+
+Supondremos el modelo normal multivariante
+
+$$
+\mathbf{Y}_{gj} \sim \mathcal N_2(\boldsymbol\mu_g,\Sigma), 
+\quad g\in\{T,I,R\},\quad j=1,\dots,n_g,
+$$
+
+donde:
+
+-   $\boldsymbol\mu_g$ es el vector de medias $(\text{NO}_2,\ \text{PM}_{2.5})$ en la zona $g$,
+-   la matriz de covarianzas $\Sigma$ es la **misma** para las tres zonas,
+-   todas las observaciones son independientes.
+
+A partir de los datos se han obtenido:
+
+-   Medias muestrales por grupo (µg/m³):
+
+    $$
+    \bar{\mathbf{y}}_T = 
+    \begin{pmatrix} 55 \\ 30 \end{pmatrix},\quad
+    \bar{\mathbf{y}}_I = 
+    \begin{pmatrix} 50 \\ 35 \end{pmatrix},\quad
+    \bar{\mathbf{y}}_R = 
+    \begin{pmatrix} 32 \\ 20 \end{pmatrix}.
+    $$
+
+-   Media muestral global:
+
+    $$
+    \bar{\mathbf{y}} = 
+    \begin{pmatrix} 44 \\ 27 \end{pmatrix}.
+    $$
+
+-   Matriz de “sumas de cuadrados y productos” dentro de zonas:
+
+    $$
+    W = 
+    \begin{pmatrix}
+    520 & 120 \\
+    120 & 410
+    \end{pmatrix}.
+    $$
+
+-   Matriz de “sumas de cuadrados y productos” entre zonas:
+
+    $$
+    B =
+    \begin{pmatrix}
+    820 & 260 \\
+    260 & 320
+    \end{pmatrix}.
+    $$
+
+La matriz total es $T = B + W$.
+
+### a.Formula las hipótesis para contrastar si los niveles medios conjuntos de $(\text{NO}_2,\ \text{PM}_{2.5})$ son iguales en las tres zonas T, I y R
+
+### b. Escribe el estadístico razón de verosimilitudes
+
+### c. Para un nivel de significación $\alpha = 0{,}05$, plantea la regla de decisión del contraste utilizando la distribución $\chi^2$ con $p(g-1)$ grados de libertad, e indica si se debe rechazar o no $H_0$.
+
+### d. Interpreta el resultado del contraste en términos de calidad del aire: ¿Se puede concluir que el patrón medio conjunto de $(\text{NO}_2,\ \text{PM}_{2.5})$ es distinto en al menos una de las zonas T, I, R?
+
+## Problema 5
+
+Explicad detalladamente el ejemplo 3.3 correspondiente a la paradoja de Rao (https://aprender-uib.github.io/AD/t3_inferencia.html#ejemplos= .
