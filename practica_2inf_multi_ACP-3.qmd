@@ -144,6 +144,8 @@ Los ficheros necesarios para realizar la práctica los podéis descargar de la p
 datosVH <- read.table("ANIMALS-matrixVH.txt", header = FALSE)
 datosSP <- read.table("ANIMALS-matrixSP.txt", header = FALSE)
 datosPM <- read.table("ANIMALS-matrixPM.txt", header = FALSE)
+ph = read.table("fileListANIMAL_phylum.txt", header=FALSE, col.names = c("species","phylum"))
+
 # convertir a matriz
 matriz_datosVH <- as.matrix(datosVH)
 matriz_datosSP <- as.matrix(datosSP)
