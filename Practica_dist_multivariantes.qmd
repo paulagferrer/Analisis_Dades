@@ -1,7 +1,7 @@
 ---
 title: "Distribuciones multivariantes en práctica: Normal y familias relacionadas"
 date: "`r format(Sys.Date())`"
-autor: Paula G Ferrer, Pep Cifre i Marc Escandell
+autor: Paula G Ferrer , Pep Cifre i Marc Escandell
 output:
   html_document:
     toc: true
