@@ -315,4 +315,5 @@ $$
 | Dormir ≥ 8h | 268, 275, 290, 260, 280, 295, 300, 285, 270, 310 | 15, 14, 17, 16, 15, 18, 17, 16, 15, 17 |
 | Dormir \< 6h | 305, 320, 330, 310, 325, 335, 340, 315, 310, 330 | 12, 11, 10, 13, 12, 11, 10, 12, 11, 10 |
 
-Contrasta la hipótesis anterior con un nivel de significación $\alpha = 0.05$ e interpreta los resultados en el contexto del problema. \#### Respuesta 5
+Contrasta la hipótesis anterior con un nivel de significación $\alpha = 0.05$ e interpreta los resultados en el contexto del problema. 
+#### Respuesta 5
