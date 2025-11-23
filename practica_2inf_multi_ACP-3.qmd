@@ -177,7 +177,8 @@ phylum_names <- c(
   "101" = "Vertebrates",
   "102" = "Lancelet",
   "103" = "Ascidians",
-  "104" = "Echinoderms",
+  "1
+  04" = "Echinoderms",
   "105" = "Hemichordates",
   "106" = "Arthropods",
   "107" = "Nematodes",
