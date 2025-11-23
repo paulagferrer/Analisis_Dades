@@ -139,16 +139,78 @@ Los ficheros necesarios para realizar la práctica los podéis descargar de la p
 
 #### Respuesta
 
+nota: errores que me he dado cuenta
+
+Fila 1 de la matriz corresponde al primer código del fichero de phylums (`hsa`),fila 2 corresponde al segundo (`ptr`) … y así hasta 369. Esto tirne sentido ya que las matrices tienen 369 fila, el fichero de phylum tiene 369 líneas. NO hay que usar row.names (no esta, pero antes lo hice). Los índices ya están alineados
+
+```{r}
+ph = read.table("fileListANIMAL_phylum.txt", header=FALSE)
+head(ph)
+ncol(ph)
+
+```
+
 ```{r}
 # cargamos datos
-datosVH <- read.table(file = "ANIMALS-matrixVH.txt", header = TRUE, sep = " ")
-datosSP <- read.table(file = "ANIMALS-matrixSP.txt", header = TRUE, sep = " ")
-datosPM <- read.table(file = "ANIMALS-matrixPM.txt", header = TRUE, sep = " ")
-
+datosVH <- read.table("ANIMALS-matrixVH.txt", header = FALSE)
+datosSP <- read.table("ANIMALS-matrixSP.txt", header = FALSE)
+datosPM <- read.table("ANIMALS-matrixPM.txt", header = FALSE)
 # convertir a matriz
 matriz_datosVH <- as.matrix(datosVH)
 matriz_datosSP <- as.matrix(datosSP)
 matriz_datosPM <- as.matrix(datosPM)
+
+#clasificación por phylum
+ph = read.table("fileListANIMAL_phylum.txt", header = FALSE, sep = "")
+species = ph$V1
+phylum  = ph$V2
+phylum_levels = levels(as.factor(phylum))
+
+# Guardamos para colorear (vector)
+phylums <- clase$phylum
+```
+
+```{r}
+#pasamos de similitudes a distancia
+# los mds trabajan con distancias 
+# dij = raiz(max(S)-Sij)
+sim_to_dist <- function(mat) {
+  max_val <- max(mat)
+  dist_mat <- sqrt(max_val - mat)
+  return(dist_mat)
+}
+
+distVH <- sim_to_dist(matriz_datosVH)
+distSP <- sim_to_dist(matriz_datosSP)
+distPM <- sim_to_dist(matriz_datosPM)
+```
+
+```{r}
+#devuelve las coordenadas principales
+mdsVH <- cmdscale(as.dist(distVH), k = 2) # k=2 indica el número de dimensiones en las que queremos representar los datos despuees de aplicar el MDS.
+mdsSP <- cmdscale(as.dist(distSP), k = 2)
+mdsPM <- cmdscale(as.dist(distPM), k = 2)
+```
+
+```{r}
+#asignamos colores
+colors <- rainbow(length(phylum_levels))
+col_vector <- colors[ match(phylums, phylum_levels) ]
+
+#grafic
+par(mfrow=c(1,3)) #tres gráficos colocados uno al lado del otro.
+
+plot(mdsVH, col = col_vector, pch = 19,
+     main = "MDS – Kernel VH")
+legend("topright", legend = phylum_levels, col = colors, pch = 19)
+
+plot(mdsSP, col = col_vector, pch = 19,
+     main = "MDS – Kernel SP")
+legend("topright", legend = phylum_levels, col = colors, pch = 19)
+
+plot(mdsPM, col = col_vector, pch = 19,
+     main = "MDS – Kernel PM")
+legend("topright", legend = phylum_levels, col = colors, pch = 19)
 ```
 
 ## Problema 4
