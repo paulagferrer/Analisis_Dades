@@ -251,6 +251,8 @@ legend("topright",
        cex = 0.8)
 ```
 
+En este primer gráfico no es sencillo discernir una diferencia clara entre la mayoría de los grupos, si bien es bien que los vertebrados y los artrópodos están bastante alejados de las otras clases de seres vivos. Esto quiere decir que la diferencia por comparación de si tienen conexiones metabólicas (nodos) parecidas o no, sin tener en cuenta la relación que estas tienen entre ellas, no es suficiente para discernir la mayoría de seres vivos pero sí en algunos en concreto. 
+
 ```{r}
 coordsSP <- cmdscale(as.dist(distSP), k = 2)
 y1 <- coordsSP[,1]
@@ -269,6 +271,8 @@ legend("topright",
        cex = 0.8)
 ```
 
+En este segundo gráfico se aprecia mejor la diferencia mencionada entre artrópodos y vertebrados del resto de individuos. Esto es debido a que ahora se comparan las distancias entre nodos, es decir, cuanto similar es una conexión metabólica de la otra en un individuo. Aún así no parece haber una diferencia clara entre las demás observaciones.
+
 ```{r}
 coordsPM <- cmdscale(as.dist(distPM), k = 2)
 y1 <- coordsPM[,1]
@@ -286,6 +290,8 @@ legend("topright",
        pch = 19,
        cex = 0.8)
 ```
+En este útlimo gráfico se vuelve a poner en evidencia lo ya mencionado en los dos anteriores. Notamos que los tres Kernels son capaces de discernir entre artrópodos y vertebrados de las demás observaciones pero no parecen diferenciar del todo entre otras clases de seres vivos. Esto podría ser debido a la cantidad de datos de estos dos grupos respecto a los demás, de modo que un aumento en el número total de observaciones podría indicar otras conclusiones.
+
 
 ## Problema 4
 
