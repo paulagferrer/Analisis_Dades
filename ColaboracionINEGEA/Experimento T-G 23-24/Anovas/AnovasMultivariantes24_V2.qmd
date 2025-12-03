@@ -1,0 +1,807 @@
+---
+title: "AnalisisMulti"
+format: html
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ez)       # para ANOVA de medidas repetidas
+library(car)      # para MANOVA y pruebas multivariantes
+# ::: {.content-hidden when-format="html"} para ocultar en html
+
+datosRepetidas <- read_excel("Excel Completo Combinaciones 2024.xlsx", sheet = 7)
+#seleccionamos las que nos interesa
+datos <- datosRepetidas %>%
+  select(
+    Variedad, Clon, Portainjerto, Genotipo, Replica, Planta, Fecha,
+    AN, gs, E, WUEi, Ymd, Ypd, Kroot, Kplant, DifY, Hojas, Afoliar
+  )
+#View(datos)
+
+#Convertir tipos de datos
+datos <- datos %>%
+  mutate(
+    Variedad = as.factor(Variedad),
+    Clon = as.factor(Clon),
+    Portainjerto = as.factor(Portainjerto),
+    Genotipo = as.factor(Genotipo),
+    Replica = as.factor(Replica),
+    Planta = as.factor(Planta),
+    Fecha = as.factor(Fecha)  # Factor tiempo
+  )
+
+# vairables dependientes
+vars_resp <- c("AN", "gs", "E", "WUEi", "Ymd", "Ypd", "Kroot", "Kplant", "DifY", "Hojas", "Afoliar")
+
+#ANOVA de medidas repetidas por separado ---
+#Planta” se usa como sujeto repetido
+
+#Efecto del CLON
+anova_clon <- ezANOVA(
+  data = datos,
+  dv = .(AN),
+  wid = .(Planta),
+  within = .(Fecha),
+  between = .(Clon),
+  type = 3,
+  detailed = TRUE
+)
+#Efecto de la VARIEDAD
+anova_variedad <- ezANOVA(
+  data = datos,
+  dv = .(AN),
+  wid = .(Planta),
+  within = .(Fecha),
+  between = .(Variedad),
+  type = 3,
+  detailed = TRUE
+)
+
+#Efecto del PORTAINJERTO
+anova_portainjerto <- ezANOVA(
+  data = datos,
+  dv = .(AN),
+  wid = .(Planta),
+  within = .(Fecha),
+  between = .(Portainjerto),
+  type = 3,
+  detailed = TRUE
+)
+
+# MANOVA multivariante
+# Primero eliminamos filas con NA en las variables dependientes
+datos_m <- datos %>%
+  drop_na(all_of(vars_resp))
+# Creamos la matriz de variables dependientes
+Y <- as.matrix(datos_m[, vars_resp])
+
+manova_res <- manova(cbind(AN, gs, E, WUEi, Kplant) ~ Variedad + Portainjerto + Clon * Fecha, data = datos)
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+# limpieza
+datos_manova <- datos[, c("Variedad", "Portainjerto", "Clon", "Fecha",
+                          "AN", "gs", "E", "WUEi", 
+                          "Ymd", "Ypd", "Kroot", "Kplant", "DifY", 
+                          "Hojas", "Afoliar")]
+datos_manova <- na.omit(datos_manova)
+
+datos_manova$Variedad <- as.factor(datos_manova$Variedad)
+datos_manova$Portainjerto <- as.factor(datos_manova$Portainjerto)
+datos_manova$Clon <- as.factor(datos_manova$Clon)
+datos_manova$Fecha <- as.factor(datos_manova$Fecha)
+
+# MANOVA general
+manova_total <- manova(
+  cbind(AN, gs, E, WUEi, Ymd, Ypd, Kroot, Kplant, Hojas, Afoliar) ~ 
+    Variedad + Portainjerto + Clon + Fecha +
+    Variedad:Fecha + Portainjerto:Fecha + Clon:Fecha,
+  data = datos_manova
+)
+
+#  Resultados multivariantes
+cat("\n========= MANOVA general =================\n")
+summary(manova_total, test = "Pillai")
+
+# ANOVAs univariantes
+
+cat("\n========= anova del manova general =================\n")
+summary.aov(manova_total)
+
+```
+
+::: {.content-hidden when-format="html"}
+En el manova, vemos que el factor clon no es significativo, entonces se deberia quitar. En cambio, la variedad y fecha son muy significativos, afectan al conjunto de variables dependientes, sobre todo la fecha ya que el efecto del tiempo es dominante.
+
+Otros valores significativos serian portainjertos y las combinaciones entre variedad:fecha y portainjerto:fecha, influyen en conjunto, pero no todas con mucha intensidad.
+
+Vemos que hay efectos globales significativos de Variedad, Portainjerto y fecha (e interacciones con fecha). En conjunto, las variables medidas (fisiologicas y productivas) varian segun esas combinaciones de factores.
+
+Los anovas:
+
+AN -\> depende de la variedad y del portainjerto, varía a lo largo del tiempo de forma distitinta según la variedad.
+
+GS-\> igual, misma dependencia, responde a variedad, portainjerto y tiempo. Con interaccion variedad:fecha.
+
+E-\> todas son muy significativas (menos clon), hay un efecto combinado fuerte
+
+wuei -\> aqui el clon si que aparece significativo, indicando que puede afectar a esta variable en particular pero no en conjunto.
+
+kplant -\> destaca porque solo es significativo la fecha, varía a lo largo del tiempo, pero no entre variedad/portainjerto.
+
+afoliar -\> se ve afectada principalmente por variedad, clon y tiempo
+
+El manova nos ha permitido detectar efectos globales de los factores sobre el conjunto de vairbles dependientes, y los anovas (univariante) nos dice que variables concretas actuan. Importante: factor fecha, variedad, portainjerto y como combinacion importante variedad:fecha.
+:::
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(readxl)
+library(dplyr)
+library(factoextra)   # para visualización PCA
+library(ggpubr)       # para combinar gráficos
+
+datos <- datosRepetidas %>%
+  mutate(across(c(Variedad, Clon, Portainjerto, Genotipo, Fecha, Replica, Planta),
+                as.factor))
+
+# variables numéricas
+variables_fisio <- datos %>%
+  select(AN, gs, E, WUEi, Ymd, Ypd, Kroot, Kplant, DifY, Hojas, Afoliar)
+
+#  PCA (centrado y escalado)
+pca_res <- prcomp(variables_fisio, scale. = TRUE)
+
+# Visualización de la varianza explicada
+fviz_eig(pca_res, addlabels = TRUE, ylim = c(0, 100)) +
+  ggtitle("% varianza explicada por cada componente principal")
+
+# --- Función auxiliar para hacer los PCA de forma coherente
+hacer_pca_plot <- function(color_var, titulo, paleta) {
+  fviz_pca_ind(
+    pca_res,
+    geom.ind = "point",
+    col.ind = color_var,
+    palette = paleta,
+    addEllipses = TRUE,
+    ellipse.type = "norm",
+    ellipse.level = 0.95,
+    pointsize = 2,
+    mean.point = TRUE,
+    legend.title = "Grupo",
+    repel = TRUE,
+    title = titulo
+  )  +
+    theme_minimal(base_size = 12) +
+    theme(
+      legend.position = "bottom",
+      legend.text = element_text(size = 8),
+      legend.title = element_text(size = 9, face = "bold"),
+      legend.key.size = unit(0.4, "cm"),
+      plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+      plot.margin = margin(10, 10, 10, 10)
+    )
+}
+
+# --- PCA por Variedad
+p1 <- hacer_pca_plot(datos$Variedad, "PCA por Variedad", c("#E69F00", "#56B4E9"))
+
+# --- PCA por Portainjerto
+p2 <- hacer_pca_plot(datos$Portainjerto, "PCA por Portainjerto", "Set2")
+
+# --- PCA por Clon
+p3 <- hacer_pca_plot(datos$Clon, "PCA por Clon", c("#D55E00", "#009E73"))
+
+# --- Mostrar los tres gráficos juntos
+ggarrange(p1, p2, p3,
+          ncol = 3, nrow = 1,
+          widths = c(1.2, 1.2, 1.2))
+#--------- graficos por separado
+p1
+p2
+p3
+
+p4 <- fviz_pca_ind(pca_res,
+                   geom.ind = "point",
+                   col.ind = datos$Fecha,
+                   palette = "Set1",
+                   addEllipses = TRUE,
+                   ellipse.level = 0.95,
+                   title = "PCA - Coloreado por Fecha")
+
+p4
+```
+
+::: {.content-hidden when-format="html"}
+Grafico varianza explicada: Cada barra representa una componente principal (PC), es decir, una nueva variable creada a partir de todas tus variables originales (AN, gs, E, WUEi, etc.).Estas componentes se ordenan según cuánta varianza total de los datos explican:
+
+La PC1 (50.4 %) representa la dirección de mayor variación en tus datos (variables muy relacionadas, como gs, AN o E). La PC2 (14.5 %) capta variaciones secundarias (quizás diferencias por fechas o condiciones hídricas). A partir de la PC3, cada componente aporta muy poca información adicional (\< 10 %). Conclusión: Con las dos primeras componentes (Dim1 y Dim2) puedes resumir más del 60 % de la información de todas tus variables fisiológicas.
+
+Grafico elipses: Cada punto representa una observación individual (una planta en una fecha concreta). Las elipses representan la zona donde se agrupan el 95% de los puntos de cada grupo
+
+Dim1 el eje x: Representa la combinación lineal de variables que explica la mayor parte de la variabilidad total del conjunto de datos. Dim1 explica el 50,4% de la variación, lo cual es bastante alto. Dim2 el eje y: Representa la siguiente dirección de variabilidad, independiente de la primera (explica un 14,5%). En conjunto, Dim1 + Dim2 explican un 64,9% de la variación total, lo que significa que la mayoría de la información de tus datos está representada en este plano.
+
+PCA por Variedad:Garnacha y Tempranillo aparecen muy superpuestos, son similares.
+
+PCA por Portainjerto:Las elipses se entremezclan, aunque algunos portainjertos pueden ocupar zonas algo distintas, diferencias ligeras, pero no marcadas.
+
+PCA por Clon:Efi e Inefi aparecen prácticamente mezclados, no hay diferenciación fisiológica clara entre clones. (entonces lo suyo seria quitarlo o no tenerlo en cuenta, ya que tenemos variedad y portainjerto)
+
+Grafico fecha: Nos muestra una vez más que la fecha es estremadamente importante y dominante.
+:::
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(ggplot2)
+library(ggrepel)
+variables_numericas <- c("AN","gs","E","WUEi","Ymd","Ypd","Kroot","Kplant","DifY","Hojas","Afoliar")
+pca_res <- prcomp(datos[, variables_numericas], scale. = TRUE)
+ind <- get_pca_ind(pca_res)
+var <- get_pca_var(pca_res)
+
+# copia con las etiquetas (no tocamos datos$Fecha original)
+datos$Fecha_lab <- factor(as.character(datos$Fecha),
+                          levels = c("1","2","3","4","R2"),
+                          labels = c("WW","WS1","WS2","R1","R2"))
+
+ggplot() +
+  geom_point(data = data.frame(ind$coord, 
+                               Fecha = datos$Fecha, 
+                               Fecha_lab = datos$Fecha_lab,
+                               Variedad = datos$Variedad),
+             aes(x = Dim.1, y = Dim.2, color = Fecha_lab, shape = Variedad),
+             size = 3, alpha = 0.8) +
+  stat_ellipse(data = data.frame(ind$coord, Fecha_lab = datos$Fecha_lab),
+               aes(x = Dim.1, y = Dim.2, color = Fecha_lab), level = 0.95) +
+  geom_segment(data = as.data.frame(3 * var$coord),
+               aes(x = 0, y = 0, xend = Dim.1, yend = Dim.2),
+               arrow = arrow(length = unit(0.2, "cm")), color = "#000000") +
+  geom_text_repel(data = as.data.frame(3 * var$coord),
+                  aes(x = Dim.1, y = Dim.2, label = rownames(var$coord)),
+                  color = "#000000", size = 3.5, max.overlaps = Inf) +
+  scale_color_brewer(palette = "Dark2", name = "Fecha") +
+  theme_minimal() +
+  labs(
+    title = "Biplot PCA por Variedad y Fecha",
+    x = paste0("Dim 1 (", round(get_eigenvalue(pca_res)[1, 2], 1), "%)"),
+    y = paste0("Dim 2 (", round(get_eigenvalue(pca_res)[2, 2], 1), "%)")
+  )
+
+```
+
+::: {.content-hidden when-format="html"}
+*Garnacha*: Más dispersa. Parece menos sensible a las condiciones intermedias (WS1), manteniendo gs y AN más tiempo. En recuperación (R1, R2) tiende a acercarse más al control (plantas que estan en WW, sin estres hidrico). A pesar de ser más dispersa, se recupera mejor.
+
+*Tempranillo:* Muestra patrones más estructurados y cambios más marcados entre tratamientos. WS2 separa muy claramente a esta variedad. Recupera peor que Garnacha (los puntos R1 y R2 no regresan tanto hacia WW). Separa mejor los tratamientos.
+
+Las fechas:
+
+-   WW vs WS2 son los grupos más distintos.
+
+-   WS1 es intermedio.
+
+-   Las recuperaciones regresan parcialmente hacia WW.
+
+Las variables
+
+-   gs, AN y Kroot tienden a hidratación.
+
+-   DifY, Kplant tienden a estrés.
+:::
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+fviz_pca_var(pca_res,
+             col.var = "contrib", # color por contribución
+             gradient.cols = c("blue", "yellow", "red"),
+             repel = TRUE,
+             labelsize = 4)
+```
+
+::: {.content-hidden when-format="html"}
+Las variables que más contribuyen en el estudio.
+
+Una recomendación sería coger: wuei, dify, e, gs y ymd. En cambio, cosas como hojas, afoliar y kplant no contribuyen mucho al estudio (numéricamente).
+:::
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE,eval=FALSE}
+library(writexl)
+
+contrib_df <- as.data.frame(var$contrib)
+cat("\n========= Contribuciones PCA =================\n")
+contrib_df
+
+write_xlsx(contrib_df, "Contribuciones_PCA.xlsx")
+
+
+loadings <- pca_res$rotation
+cat("\n========= Loadings PCA =================\n")
+loadings
+
+write_xlsx(as.data.frame(loadings), "PCA_loadings.xlsx")
+
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(corrplot)
+
+# Matriz de correlaciones
+corr_matrix <- cor(variables_fisio, use = "pairwise.complete.obs")
+
+# mapa correlaciones con numeritos
+corrplot(corr_matrix,
+         method = "color",
+         type = "upper",
+         order = "hclust",
+         tl.col = "black",
+         tl.cex = 0.8,
+         addCoef.col = "black",
+         number.cex = 0.6) 
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(viridis)
+library(reshape2)
+
+variables_fisio <- datos %>%
+  select(AN, gs, E, WUEi, Ymd, Ypd, Kroot, Kplant, DifY, Hojas, Afoliar)
+
+# clustering para ordenar 
+hc <- hclust(dist(corr_matrix))
+corr_matrix <- corr_matrix[hc$order, hc$order]
+
+# formato largo
+corr_long <- melt(corr_matrix)
+
+# mapa de calor
+ggplot(corr_long, aes(Var1, Var2, fill = value)) +
+  geom_tile(color = "black") +
+  scale_fill_viridis(discrete=FALSE) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold")
+  ) +
+  ggtitle("Heatman correlaciones")
+
+```
+
+<div>
+
+Las variables AN, gs, E, WUEi… se han medido varias veces por planta y por fecha (datos repetidos), en cambio BioPoda, EstDen, EstSize, ... se midieron solo 1 vez por planta, o bien como un promedio.
+
+Ergo, sus vectores no tienen el mismo número de observaciones, no se puede calcular correlaciones directamente. Entonces, una forma de arreglarlo ha sido agrupar todos los datos por planta, y luego extraemos un único valor que sea el representativo de cada variable, asi reducimos todas las variables al mimos "nivel de análisis", que en este caso sería la planta.
+
+Las técnicas o estrategias que se han utilizado, han sido primero hacer los promedios de cosas como AN, gs, E, etc. (justificacion matematica: el promedio es un estimador insesgado de la media poblacional si los errores son aleatorios.) y esto es valido ya que queremos un valor "general" de la planta, ya que queremos compararlo con variables de una sola muestra (toma).
+
+Luego he emparejado las variables que ya tienen un único vaor para cada planta. (codigo join 1:1 no altera los datos)
+
+Ya luego cuando todo el munda ya esta bien, es hacer la matriz de correlacion y graficar. Ahora bien, matematicamente podemos correlaciones pormedios con valores unicos porque ambos representan caracteristicas de la misma unidad del experimento, es decir, la planta. Lo bueno, es que este procedimeinto no nos hace perder informacion que sea importante y ya con todo esto podemos hacer manovas, pca, mapas, si quisieramos y seria valido.
+
+</div>
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+library(readxl)
+library(dplyr)
+library(corrplot)
+library(ggplot2)
+
+datos <- read_excel("Excel Completo Combinaciones 2024.xlsx", sheet = 7)
+
+# factors
+datos <- datos %>% 
+  mutate(across(c(Variedad, Portainjerto, Clon, Genotipo, Fecha, Planta, Replica),
+                as.factor))
+
+# cambiar etiquetas de Fecha
+datos <- datos %>%
+  mutate(
+    Fecha_lab = factor(as.character(Fecha),
+                       levels = c("1","2","3","4","R2"),
+                       labels = c("WW","WS1","WS2","R1","R2"))
+  )
+
+
+# ---------------------------------------------
+# GENERAL: WW, WS1, WS2  
+# ---------------------------------------------
+
+datos_filtrado <- datos %>%
+  filter(Fecha_lab %in% c("WW","WS1","WS2"))
+
+vars_num <- datos_filtrado %>% select(where(is.numeric))
+
+corr_general <- cor(vars_num, use = "pairwise.complete.obs")
+
+corrplot(corr_general,
+         method = "color",
+         type = "upper",
+         order = "hclust",
+         tl.col = "black",
+         tl.cex = 0.7,
+         addCoef.col = "black",
+         number.cex = 0.5,
+         main = "Correlaciones generales (WW, WS1, WS2)",
+         mar = c(0, 0, 1, 0),
+         cex.main = 1.1)
+
+
+# ----------------------------------------------------------
+# MATRICES POR VARIEDAD / PORTAINJERTO / CLON
+# (USANDO TODAS LAS FECHAS)
+# ----------------------------------------------------------
+
+# usamos el dataset completo: datos
+datos_completo <- datos
+
+# VARIEDAD
+for(v in unique(datos_completo$Variedad)) {
+  
+  sub <- datos_completo %>% filter(Variedad == v)
+  vars_sub <- sub %>% select(where(is.numeric))
+  
+  if(nrow(vars_sub) > 3) {
+    corr <- cor(vars_sub, use = "pairwise.complete.obs")
+    
+    corrplot(corr,
+             method = "color",
+             type = "upper",
+             tl.col = "black",
+             tl.cex = 0.7,
+             addCoef.col = "black",
+             number.cex = 0.5,
+             main = paste("Correlaciones - Variedad:", v),
+             mar = c(0, 0, 1, 0),
+             cex.main = 1.1)
+  }
+}
+
+# PORTAINJERTO
+for(p in unique(datos_completo$Portainjerto)) {
+  
+  sub <- datos_completo %>% filter(Portainjerto == p)
+  vars_sub <- sub %>% select(where(is.numeric))
+  
+  if(nrow(vars_sub) > 3) {
+    corr <- cor(vars_sub, use = "pairwise.complete.obs")
+    
+    corrplot(corr,
+             method = "color",
+             type = "upper",
+             tl.col = "black",
+             tl.cex = 0.7,
+             addCoef.col = "black",
+             number.cex = 0.5,
+             main = paste("Correlaciones - Portainjerto:", p),
+             mar = c(0, 0, 1, 0),
+             cex.main = 1.1)
+  }
+}
+
+# CLON
+for(c in unique(datos_completo$Clon)) {
+  
+  sub <- datos_completo %>% filter(Clon == c)
+  vars_sub <- sub %>% select(where(is.numeric))
+  
+  if(nrow(vars_sub) > 3) {
+    corr <- cor(vars_sub, use = "pairwise.complete.obs")
+    
+    corrplot(corr,
+             method = "color",
+             type = "upper",
+             tl.col = "black",
+             tl.cex = 0.7,
+             addCoef.col = "black",
+             number.cex = 0.5,
+             main = paste("Correlaciones - Clon:", c),
+             mar = c(0, 0, 1, 0),
+             cex.main = 1.1)
+  }
+}
+
+```
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+cat("\n============= CORRELACIÓN GENERAL (WW, WS1, WS2) ============\n")
+print(corr_general)
+
+# ============================
+#   POR VARIEDAD
+# ============================
+
+for(v in unique(datos$Variedad)) {
+  
+  sub <- datos %>% filter(Variedad == v)
+  vars_sub <- sub %>% select(where(is.numeric))
+  
+  if(nrow(vars_sub) > 3) {
+    corr <- cor(vars_sub, use = "pairwise.complete.obs")
+    
+    cat("\n========= CORRELACIÓN - VARIEDAD:", as.character(v), "============\n")
+    print(corr)
+  }
+}
+
+
+# ============================
+#   POR PORTAINJERTO 
+# ============================
+
+for(p in unique(datos$Portainjerto)) {
+  
+  sub <- datos %>% filter(Portainjerto == p)
+  vars_sub <- sub %>% select(where(is.numeric))
+  
+  if(nrow(vars_sub) > 3) {
+    corr <- cor(vars_sub, use = "pairwise.complete.obs")
+    
+    cat("\n======= CORRELACIÓN - PORTAINJERTO:", as.character(p), "=======\n")
+    print(corr)
+  }
+}
+
+
+# ============================
+#   clon
+# ============================
+
+for(c in unique(datos$Clon)) {
+  
+  sub <- datos %>% filter(Clon == c)
+  vars_sub <- sub %>% select(where(is.numeric))
+  
+  if(nrow(vars_sub) > 3) {
+    corr <- cor(vars_sub, use = "pairwise.complete.obs")
+    
+    cat("\n========= CORRELACIÓN - CLON:", as.character(c), "==============\n")
+    print(corr)
+  }
+}
+```
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+library(readxl)
+library(dplyr)
+library(openxlsx)  
+library(corrplot)   
+
+# ============================================================
+# 1. CARGA DE DATOS Y FACTORES
+# ============================================================
+
+datos <- read_excel("Excel Completo Combinaciones 2024.xlsx", sheet = 7)
+
+datos <- datos %>%
+  mutate(across(c(Variedad, Portainjerto, Clon, Genotipo, Fecha, Planta, Replica),
+                as.factor)) %>%
+  mutate(
+    Fecha_lab = factor(as.character(Fecha),
+                       levels = c("1","2","3","4","R2"),
+                       labels = c("WW","WS1","WS2","R1","R2"))
+  )
+
+# ============================================================
+# 2. EFI / INEFI (normalizando con toupper)
+# ============================================================
+
+efi_list   <- toupper(c("T232", "G435"))
+inefi_list <- toupper(c("T1052", "G15"))
+
+datos <- datos %>%
+  mutate(Clon_up = toupper(as.character(Clon)),
+         Clon_nomen = case_when(
+           Clon_up %in% efi_list ~ "EFI",
+           Clon_up %in% inefi_list ~ "INEFI",
+           TRUE ~ "OTRO"
+         )) %>%
+  mutate(Clon_nomen = factor(Clon_nomen, levels = c("EFI","INEFI","OTRO")))
+
+# ============================================================
+# 3. FILTRO (solo WW, WS1, WS2)
+# ============================================================
+
+datos_filtrado <- datos %>%
+  filter(Fecha_lab %in% c("WW","WS1","WS2"))
+
+# ============================================================
+# 4. FUNCIÓN PARA CALCULAR CORR Y GUARDAR TXT
+# ============================================================
+
+calc_corr <- function(df_numeric) {
+  if (ncol(df_numeric) < 2) return(NULL)
+  cor(df_numeric, use = "pairwise.complete.obs")
+}
+
+# ------ NUEVO: función que guarda txt ------
+
+save_corr_txt <- function(mat, name) {
+  
+  file_name <- paste0("CORR_", name, ".txt")
+  
+  if (is.null(mat)) {
+    write(paste("No hay suficientes datos para calcular correlación en", name),
+          file = file_name)
+    
+  } else {
+    df <- round(mat, 4)
+    write.table(df,
+                file = file_name,
+                sep = "\t",
+                quote = FALSE,
+                col.names = NA)   # guarda nombres de fila
+  }
+  
+  message("Guardado: ", file_name)
+}
+
+# ============================================================
+# 5. MATRIZ GENERAL (WW, WS1, WS2)
+# ============================================================
+
+vars_num_general <- datos_filtrado %>% select(where(is.numeric))
+corr_general <- calc_corr(vars_num_general)
+save_corr_txt(corr_general, "GENERAL_WW_WS1_WS2")
+
+# ============================================================
+# 6. VARIEDAD (todas y WW-WS1-WS2)
+# ============================================================
+
+for(v in unique(as.character(datos$Variedad))) {
+  
+  sub_all <- datos %>% filter(Variedad == v)
+  corr_all <- calc_corr(sub_all %>% select(where(is.numeric)))
+  save_corr_txt(corr_all, paste0("VARIEDAD_", v, "_TODAS"))
+  
+  sub_w <- datos_filtrado %>% filter(Variedad == v)
+  corr_w <- calc_corr(sub_w %>% select(where(is.numeric)))
+  save_corr_txt(corr_w, paste0("VARIEDAD_", v, "_WW_WS1_WS2"))
+}
+
+# ============================================================
+# 7. PORTAINJERTO
+# ============================================================
+
+for(p in unique(as.character(datos$Portainjerto))) {
+  
+  sub_all <- datos %>% filter(Portainjerto == p)
+  corr_all <- calc_corr(sub_all %>% select(where(is.numeric)))
+  save_corr_txt(corr_all, paste0("PORT_", p, "_TODAS"))
+  
+  sub_w <- datos_filtrado %>% filter(Portainjerto == p)
+  corr_w <- calc_corr(sub_w %>% select(where(is.numeric)))
+  save_corr_txt(corr_w, paste0("PORT_", p, "_WW_WS1_WS2"))
+}
+
+# ============================================================
+# 8. CLON (nomenclatura original)
+# ============================================================
+
+for(cl in unique(as.character(datos$Clon))) {
+  
+  safe_cl <- gsub("[^A-Za-z0-9]", "_", cl)
+  
+  sub_all <- datos %>% filter(Clon == cl)
+  corr_all <- calc_corr(sub_all %>% select(where(is.numeric)))
+  save_corr_txt(corr_all, paste0("CLON_", safe_cl, "_TODAS"))
+  
+  sub_w <- datos_filtrado %>% filter(Clon == cl)
+  corr_w <- calc_corr(sub_w %>% select(where(is.numeric)))
+  save_corr_txt(corr_w, paste0("CLON_", safe_cl, "_WW_WS1_WS2"))
+}
+
+# ============================================================
+# 9. CLON_NOMEN (EFI / INEFI / OTRO)
+# ============================================================
+
+for(group in unique(as.character(datos$Clon_nomen))) {
+  
+  sub_all <- datos %>% filter(Clon_nomen == group)
+  corr_all <- calc_corr(sub_all %>% select(where(is.numeric)))
+  save_corr_txt(corr_all, paste0("NOMEN_", group, "_TODAS"))
+  
+  sub_w <- datos_filtrado %>% filter(Clon_nomen == group)
+  corr_w <- calc_corr(sub_w %>% select(where(is.numeric)))
+  save_corr_txt(corr_w, paste0("NOMEN_", group, "_WW_WS1_WS2"))
+}
+```
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+library(readxl)
+library(dplyr)
+library(openxlsx)  
+library(corrplot) 
+# =======================
+# 1. Cargar datos (HOJA 5)
+# =======================
+datos <- read_excel("Excel Completo Combinaciones 2024.xlsx", sheet = 5)
+
+# Convertir factores
+datos <- datos %>% 
+  mutate(across(c(Variedad, Portainjerto, Clon, Genotipo, Fecha, Planta, Replica),
+                as.factor))
+
+# Fecha a etiquetas
+datos <- datos %>%
+  mutate(
+    Fecha_lab = factor(as.character(Fecha),
+                       levels = c("1","2","3","4","R2"),
+                       labels = c("WW","WS1","WS2","R1","R2"))
+  )
+
+datos_all <- datos
+
+
+# =======================
+# FUNCIÓN PARA PINTAR CORRELACIONES
+# =======================
+plot_corr_matrix <- function(data, title) {
+
+  vars <- data %>% select(where(is.numeric))
+  
+  if (nrow(vars) > 3) {
+    m <- cor(vars, use = "pairwise.complete.obs")
+    
+    corrplot(m,
+             method = "color",
+             type = "upper",
+             order = "hclust",
+             tl.col = "black",
+             tl.cex = 0.7,
+             addCoef.col = "black",
+             number.cex = 0.45,
+             number.digits = 3,
+             main = title,
+             mar = c(0,0,2,0),
+             cex.main = 1.2)
+  }
+}
+
+
+# =======================
+# 7. EFI / INEFI (USANDO CLONES REALES)
+# =======================
+
+clones_efi    <- c("T232", "g435")
+clones_inefi  <- c("T1052", "g15")
+
+datos_efi   <- datos_all %>% filter(Clon %in% clones_efi)
+datos_inefi <- datos_all %>% filter(Clon %in% clones_inefi)
+
+plot_corr_matrix(datos_efi, "Correlaciones - EFI (T232, g435)")
+plot_corr_matrix(datos_inefi, "Correlaciones - INEFI (T1052, g15)")
+```
+
+```{r}
+# =======================
+# FUNCIÓN PARA GUARDAR MATRICES DE CORRELACIÓN EN TXT
+# =======================
+
+save_corr_matrix <- function(data, filename) {
+  
+  vars <- data %>% select(where(is.numeric))
+  
+  if (nrow(vars) > 3) {
+    m <- cor(vars, use = "pairwise.complete.obs")
+    write.table(round(m, 3),
+                file = filename,
+                sep = "\t",
+                quote = FALSE,
+                col.names = NA)
+  } else {
+    cat("No hay suficientes datos numéricos para:", filename, "\n")
+  }
+}
+# Guardar matrices EFI / INEFI en TXT
+save_corr_matrix(datos_efi,
+                 "Correlacion_EFI_T232_g435.txt")
+
+save_corr_matrix(datos_inefi,
+                 "Correlacion_INEFI_T1052_g15.txt")
+
+```

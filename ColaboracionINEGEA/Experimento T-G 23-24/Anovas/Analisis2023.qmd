@@ -1,0 +1,286 @@
+---
+title: "AnalisisMulti_2023"
+format: html
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+library(readxl)
+library(dplyr)
+library(corrplot)
+
+# ========= 1. Cargar datos =========
+datos2023 <- read_excel("VidComb 2023 Limpio.xlsx", sheet = 4)
+
+# ========= 2. Convertir columnas a factores =========
+datos2023 <- datos2023 %>% 
+  mutate(across(c(Portainjerto, Clon, Genotipo, Variedad, Replica, Fecha),
+                as.factor))
+
+# ========= 3. Filtrar WW, WS1, WS2 =========
+datos_filtrado <- datos2023 %>% filter(Fecha %in% c("WW","WS1","WS2"))
+
+# ========= 4. Variables numéricas =========
+vars_num <- c("AN","gs","E","WUEi","Ypd","Ymd","DifY","Chl",
+              "Kroot","Kplant","Hojas","Afoliar",
+              "BioPoda","BioRaiz","CoBio",
+              "AeBio","RaizBio","EstSize","EstDen",
+              "RDxil","RDenXil","TDxil","TDenXil")
+
+# ========= 5. Función para graficar correlación única =========
+plot_corr_matrix_all <- function(data, title) {
+  
+  x <- data %>% select(all_of(vars_num))
+  
+  # MINIMO 3 OBSERVACIONES
+  if(nrow(x) < 3) {
+    stop("⚠️ No hay suficientes observaciones")
+  }
+  
+  # Correlación usando pairwise, no eliminamos columnas
+  m <- cor(x, use = "pairwise.complete.obs")
+  
+  # Graficar
+   corrplot(m,
+             method = "color",
+             type = "upper",
+             order = "hclust",
+             tl.col = "black",
+             tl.cex = 0.7,
+             addCoef.col = "black",
+             number.cex = 0.45,
+             number.digits = 3,
+             main = title,
+             mar = c(0,0,2,0),
+             cex.main = 1.2)
+}
+
+# ========= 6. Graficar todo en un solo corrplot =========
+plot_corr_matrix_all(datos_filtrado, "Correlación WW, WS1 y WS2")
+
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(readxl)
+library(dplyr)
+library(corrplot)
+
+# ============================
+# 1. Cargar datos
+# ============================
+datos <- read_excel("VidComb 2023 Limpio.xlsx", sheet = 4) %>%
+  mutate(across(c(Portainjerto, Clon, Genotipo, Variedad, Replica, Planta, Fecha), as.factor))
+
+# ============================
+# 2. Filtrar fechas de interés
+# ============================
+fechas <- c("WW","WS1","WS2")
+datos_filtrado <- datos %>% filter(Fecha %in% fechas)
+
+# ============================
+# 3. Variables numéricas a correlacionar
+# ============================
+vars_num <- c("AN","gs","E","WUEi","Ypd","Ymd","DifY","Chl","Kroot","Kplant",
+              "Hojas","Afoliar","BioPoda","BioRaiz","CoBio","AeBio","RaizBio",
+              "EstSize","EstDen","RDxil","RDenXil","TDxil","TDenXil")
+
+# ============================
+# 4. Función de correlación mejorada
+# ============================
+plot_corr_genotipo <- function(df, genotipo){
+  
+  df_g <- df %>% filter(Genotipo == genotipo)
+  
+  if(nrow(df_g) < 3){
+    message("No hay suficientes observaciones para genotipo: ", genotipo)
+    return(NULL)
+  }
+  
+  x <- df_g %>% select(all_of(vars_num))
+  
+  # Eliminar columnas con todos NA
+  x <- x[, colSums(!is.na(x)) > 0]
+  
+  # Matriz de correlación
+  m <- cor(x, use="pairwise.complete.obs")
+  
+  # Título
+  title <- paste("Correlación - Genotipo:", genotipo)
+  
+  # Plot
+  corrplot(m,
+           method = "color",
+           type = "upper",
+           order = "hclust",
+           tl.col = "black",
+           tl.cex = 0.7,
+           addCoef.col = "black",
+           number.cex = 0.4,
+           number.digits = 3,
+           main = title,
+           mar = c(0,0,2,0),
+           cex.main = 1.2)
+}
+
+# ============================
+# 5. Bucle por genotipo
+# ============================
+genotipos <- unique(datos_filtrado$Genotipo)
+
+for(g in genotipos){
+  plot_corr_genotipo(datos_filtrado, g)
+}
+
+```
+
+::: {.content-hidden when-format="html"}
+Explicación de porque los graficos se ven asi de mal:
+
+Cuando se intenta hacer el PCA usando todas las variables del Excel (te lo adjunto), los gráficos salían aglomerados y poco informativos. Esto se debe a que:
+
+Muchas variables tenían pocos datos. Algunas columnas tenían solo 17–100 observaciones, mientras que otras tenían más de 400. Esto significa que muchas variables estaban casi vacías y la mayoría de sus valores eran NA.
+
+Variables casi constantes. Incluso imputando NAs con la media, algunas columnas terminaban siendo casi constantes, es decir, todos los valores eran iguales o muy similares. Ojo que el PCA se basa en la varianza de los datos, si una columna no varía, no aporta información para separar los puntos.
+
+Escalas muy distintas: algunas variables medían valores de 0–25, otras biomasa en cientos, y otras proporciones muy pequeñas. Sin escalar correctamente, las variables con números grandes dominan el PCA y “aplanan” la distribución de los puntos.
+
+Resultado de los gráficos: Los puntos del biplot aparecían aplastados cerca de cero. Las flechas de variables casi constantes eran muy cortas o invisibles, y los puntos se veían aglomerados, sin distinguir bien las fechas o grupos.
+
+"Solución": Seleccionamos solo las variables con suficiente variación y datos completos (antes habia un % de la información horrible, menor a 65%). Imputamos NAs solo en esas variables. Escalamos los datos antes del PCA. Separar los colores de los puntos (fechas) y flechas (contribución) para que se vean claramente.
+
+Entonces el gráfico que vale más la pena es este:
+:::
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE,eval=FALSE}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(grid)
+library(ggnewscale)
+library(RColorBrewer)
+
+datos <- read_excel("VidComb 2023 Limpio.xlsx", sheet = 4) %>%
+  mutate(across(c(Portainjerto, Clon, Genotipo, Variedad, Replica, Planta, Fecha), as.factor))
+
+vars_use <- c("AN","gs","E","WUEi","Ypd","Ymd","DifY","Chl","Kroot","Kplant") 
+
+df_num <- datos %>% select(all_of(vars_use))
+
+df_num_imput <- df_num %>%
+  mutate(across(everything(), ~ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+pca_res <- prcomp(df_num_imput, scale. = TRUE)
+
+
+ind_scores <- as.data.frame(pca_res$x[,1:2])
+colnames(ind_scores) <- c("PC1","PC2")
+ind_scores$Fecha <- datos$Fecha
+
+
+loadings <- as.data.frame(pca_res$rotation[,1:2])
+loadings$Variable <- rownames(loadings)
+loadings$contrib <- rowSums(loadings[,1:2]^2)
+arrow_mult <- 3
+loadings$xend <- loadings[,1]*arrow_mult
+loadings$yend <- loadings[,2]*arrow_mult
+
+
+# Paleta  para puntos 
+cols_points <- brewer.pal(n = 5, name = "Set2")
+
+# Paleta para flechas
+cols_arrows <- brewer.pal(n = 5, name = "Dark2")
+
+biplot <- ggplot() +
+  # Puntos por Fecha
+  geom_point(data=ind_scores, aes(x=PC1, y=PC2, color=Fecha), size=3) +
+  # Dibujar elipses solo si hay >=3 puntos por fecha
+  geom_path(data = ind_scores %>% group_by(Fecha) %>% 
+              filter(n() >= 3) %>% 
+              do(ellipse = data.frame(ellipse::ellipse(cov(cbind(.$PC1, .$PC2)), centre = colMeans(cbind(.$PC1, .$PC2))))) %>% 
+              tidyr::unnest(cols = c(ellipse)),
+            aes(x = x, y = y, group = Fecha, color=Fecha), linetype=2) +
+  scale_color_manual(values = cols_points) +
+  ggnewscale::new_scale_color() +
+  # Flechas de variables
+  geom_segment(data=loadings, aes(x=0, y=0, xend=xend, yend=yend, color=contrib),
+               arrow=arrow(length=unit(0.2,"cm")), linewidth=1) +
+  geom_text(data=loadings, aes(x=xend*1.05, y=yend*1.05, label=Variable, color=contrib),
+            size=4, fontface="bold") +
+  scale_color_gradient(low="black", high="red") +
+  labs(title="Biplot PCA - Todas las fechas",
+       x=paste0("PC1 (", round(100*(pca_res$sdev[1]^2)/sum(pca_res$sdev^2),1), "%)"),
+       y=paste0("PC2 (", round(100*(pca_res$sdev[2]^2)/sum(pca_res$sdev^2),1), "%)")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust=0.5, face="bold"),
+    legend.position = "right"
+  )
+
+# Mostrar gráfico
+print(biplot)
+
+```
+
+Gráficos malos:
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE,eval=FALSE}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(grid)
+library(ggnewscale)
+
+# 1. Cargar datos
+datos2023 <- read_excel("VidComb 2023 Limpio.xlsx", sheet = 4)
+datos2023 <- datos2023 %>%
+  mutate(across(c(Portainjerto, Clon, Genotipo, Variedad, Replica, Fecha),
+                as.factor))
+
+vars_num <- c("AN","gs","E","WUEi","Ypd","Ymd","DifY","Chl",
+              "Kroot","Kplant","Hojas","Afoliar",
+              "BioPoda","BioRaiz","CoBio",
+              "AeBio","RaizBio","EstSize","EstDen",
+              "RDxil","RDenXil","TDxil","TDenXil")
+
+fechas <- c("WW","WS1","WS2","R1","R2")
+datos_filtrado <- datos2023 %>% filter(Fecha %in% fechas)
+
+# 2. Imputar NAs
+df_num <- datos_filtrado %>% select(all_of(vars_num))
+df_num_imput <- df_num %>% mutate(across(everything(), ~ifelse(is.na(.), mean(., na.rm=TRUE), .)))
+
+# 3. PCA
+pca_res <- prcomp(df_num_imput, scale. = TRUE)
+
+# 4. Scores y loadings
+ind_scores <- as.data.frame(pca_res$x[,1:2])
+ind_scores$Fecha <- datos_filtrado$Fecha
+
+loadings <- as.data.frame(pca_res$rotation[,1:2])
+loadings$Variable <- rownames(loadings)
+loadings$contrib <- rowSums(loadings[,1:2]^2)
+arrow_mult <- 3
+loadings$xend <- loadings[,1]*arrow_mult
+loadings$yend <- loadings[,2]*arrow_mult
+
+# 5. Biplot con dos escalas de color
+ggplot() +
+  # Puntos (Fecha) - discreto
+  geom_point(data=ind_scores, aes(x=PC1, y=PC2, color=Fecha), size=3) +
+  stat_ellipse(data=ind_scores, aes(x=PC1, y=PC2, group=Fecha, color=Fecha),
+               linetype=2, level=0.95) +
+  scale_color_brewer(palette="Set1") +   # paleta discreta para puntos
+  ggnewscale::new_scale_color() +        # reinicia escala de color
+  # Flechas de variables - continuo
+  geom_segment(data=loadings, aes(x=0, y=0, xend=xend, yend=yend, color=contrib),
+               arrow=arrow(length=unit(0.2,"cm")), linewidth=1) +
+  geom_text(data=loadings, aes(x=xend*1.05, y=yend*1.05, label=Variable, color=contrib),
+            size=4, fontface="bold") +
+  scale_color_gradient(low="#00AFBB", high="#FC4E07") + # gradiente para flechas
+  labs(title="Biplot PCA - Todas las fechas",
+       x=paste0("PC1 (", round(100*(pca_res$sdev[1]^2)/sum(pca_res$sdev^2),1), "%)"),
+       y=paste0("PC2 (", round(100*(pca_res$sdev[2]^2)/sum(pca_res$sdev^2),1), "%)")) +
+  theme_minimal()
+
+```

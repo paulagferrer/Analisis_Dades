@@ -1,0 +1,144 @@
+---
+title: "CorrelacionsV1"
+format: html
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(readxl) #leer excel
+library(writexl) #escribir en excel
+library(openxlsx) #va mejor si hay muchas hojas
+library(dplyr)
+library(ggplot2)
+options(digits = 10)
+
+datosCombinaciones24 <- read_excel("Excel Completo Combinaciones 2024.xlsx", sheet = 10) # leemos la pagina li cor limpio
+#View(datosCombinaciones24)
+datosCombinaciones23 <- read_excel("VidComb 2023 Limpio.xlsx", sheet = 3) #leemos la pagina todo limpio
+#View(datosCombinaciones23)
+
+#unique(datosCombinaciones23$Fecha) # 5 momentos
+#unique(datosCombinaciones24$Momento) # 7 momentos
+```
+
+```{r message=FALSE, warning=FALSE}
+
+library(dplyr)
+library(readxl)
+library(GGally)
+library(ggplot2)
+library(corrplot)
+
+preparar_y_promediar <- function(data, año) {
+  if ("Clon" %in% names(data)) data <- rename(data, Vinifera = Clon)
+  if ("Genotipo" %in% names(data)) data <- rename(data, Combinacion = Genotipo)
+  if ("Fecha" %in% names(data)) data <- rename(data, Momento = Fecha)
+  
+  # Seleccionar variables
+  data <- data %>%
+    select(Momento, WUEi, Ymd, Ypd, AN, gs, E, `Kroot-stem`, Kplant,
+           Hojas, `Area Folicular`, `Peso Madera Poda`, `Peso Raiz`, LnEUA) %>%
+    mutate(
+      across(
+        everything(),
+        ~ as.numeric(gsub("[^0-9,.-]", "", as.character(.)))  # limpia símbolos no numéricos
+      ),
+      Indice = WUEi / abs(Ymd - Ypd),    # índice fisiológico
+      `Ymd - Ypd` = Ymd - Ypd,           # diferencia entre valores
+      Año = año
+    )
+  
+  #promedios
+  promedios <- data %>%
+    group_by(Momento) %>%
+    summarise(
+      mean_WUEi = mean(WUEi, na.rm = TRUE),
+      mean_Indice = mean(Indice, na.rm = TRUE),
+      mean_AN = mean(AN, na.rm = TRUE),
+      mean_gs = mean(gs, na.rm = TRUE),
+      mean_E = mean(E, na.rm = TRUE),
+      mean_Kroot_stem = mean(`Kroot-stem`, na.rm = TRUE),
+      mean_Kplant = mean(Kplant, na.rm = TRUE),
+      mean_Hojas = mean(Hojas, na.rm = TRUE),
+      mean_AreaFolicular = mean(`Area Folicular`, na.rm = TRUE),
+      mean_PesoMaderaPoda = mean(`Peso Madera Poda`, na.rm = TRUE),
+      mean_PesoRaiz = mean(`Peso Raiz`, na.rm = TRUE),
+      mean_LnEUA = mean(LnEUA, na.rm = TRUE),
+      mean_Ymd = mean(Ymd, na.rm = TRUE),
+      mean_Ypd = mean(Ypd, na.rm = TRUE),
+      mean_DifYmdYpd = mean(`Ymd - Ypd`, na.rm = TRUE),
+      n_obs = n(),   # número de observaciones
+      .groups = "drop"
+    )
+  
+  return(list(datos_limpios = data, promedios = promedios))
+}
+
+res_2023 <- preparar_y_promediar(datosCombinaciones23, 2023)
+#res_2024 <- preparar_y_promediar(datosCombinaciones24, 2024)
+
+# gráfico de correlaciones
+graficar_correlaciones <- function(promedios, year_label) {
+  ggpairs(
+    promedios,
+    columns = c(
+      "mean_WUEi", "mean_Indice", "mean_AN", "mean_gs",
+      "mean_E", "mean_Kroot_stem", "mean_Kplant",
+      "mean_Hojas", "mean_AreaFolicular", "mean_PesoMaderaPoda",
+      "mean_PesoRaiz", "mean_LnEUA", "mean_Ymd", "mean_Ypd", "mean_DifYmdYpd"
+    ),
+    upper = list(continuous = wrap("cor", method = "spearman", size = 1.2)),  # correlaciones visibles
+    lower = list(continuous = wrap("smooth", alpha = 0.6, size = 0.5)),    # suavizado con transparencia
+    diag = list(continuous = wrap("densityDiag", alpha = 0.6))
+  ) +
+    theme_minimal(base_size = 20) +
+    theme(
+      axis.text.x = element_text(size = 4, angle = 45, hjust = 1.3),
+      axis.text.y = element_text(size = 4, hjust = 1),
+      strip.text = element_text(size = 4),
+      plot.title = element_text(size = 10, face = "bold", hjust = 0.8)
+    ) +
+    ggtitle(paste("Correlaciones entre variables -", year_label))
+}
+
+p2023 <- graficar_correlaciones(res_2023$promedios, 2023)
+#p2024 <- graficar_correlaciones(res_2024$promedios, 2024)
+
+print(p2023) # feo, no se quiere arreglar
+#print(p2024)
+
+
+# otro tipo de grafico, que no me explota al menos
+graficar_matriz_cor <- function(promedios, year_label) {
+  sub <- promedios %>% select(starts_with("mean_"))
+  
+  # Eliminamos columnas sin varianza o con todos los valores NA
+  var_cero <- names(sub)[sapply(sub, function(x) var(x, na.rm = TRUE) == 0)]
+  if (length(var_cero) > 0) {
+    message(" Columnas eliminadas por falta de varianza en ", year_label, ": ",
+            paste(var_cero, collapse = ", "))
+    sub <- sub[, !(names(sub) %in% var_cero)]
+  }
+  
+  # Calcular matriz de correlaciones
+  matriz_cor <- cor(sub) #, method = "spearman", use = "pairwise.complete.obs")
+  
+  # Sustituir valores no finitos (NA, NaN, Inf), que no pete
+  matriz_cor[!is.finite(matriz_cor)] <- 0
+  
+  corrplot(
+    matriz_cor,
+    method = "color",
+    type = "upper",
+    tl.col = "black", tl.cex = 0.4, #texto variables
+    number.cex = 0.4,
+    order = "original",              
+    addCoef.col = "gray1", #numeros
+    title = paste("Matriz de correlaciones -", year_label),
+    mar = c(0, 0, 2, 0)
+  )
+}
+
+graficar_matriz_cor(res_2023$promedios, 2023)
+#graficar_matriz_cor(res_2024$promedios, 2024)
+```
