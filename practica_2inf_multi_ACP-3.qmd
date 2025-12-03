@@ -123,7 +123,7 @@ Aseguraos de incluir, un análisis de la matriz de correlaciones.
 
 Resolved el ejercicio propuesto como práctica en [la sección 4.10 de los apuntes](https://aprender-uib.github.io/AD/t4_trd.html#mds-no-m%C3%A9trico). Los datos necesarios para este ejercicio se encuentran en la carpeta de Aula Digital, con el nombre: "Datos para el problema 3 de la practica_2inf_multi_ACP)", disponible en la sección "Práctica".
 
-El metabolismo se caracteriza por reacciones químicas vinculadas entre sí, creando una compleja estructura de red. Una representación simplificada del metabolismo, que denominamos red metabólica abstracta, es un grafo en el que las vías metabólicas son nodos y existe una arista entre dos nodos si sus correspondientes vías comparten uno o más compuestos.
+Enunciado: El metabolismo se caracteriza por reacciones químicas vinculadas entre sí, creando una compleja estructura de red. Una representación simplificada del metabolismo, que denominamos red metabólica abstracta, es un grafo en el que las vías metabólicas son nodos y existe una arista entre dos nodos si sus correspondientes vías comparten uno o más compuestos.
 
 Para explorar los potenciales y límites de una representación tan básica, hemos empleado tres tipos de kernels (distancias entre grafos):
 
@@ -135,9 +135,30 @@ Para explorar los potenciales y límites de una representación tan básica, hem
 
 La práctica consiste en representar gráficamente (con solo 2 coordenadas principales) las matrices de similitud generadas por cada kernel coloreando los puntos de acuerdo al grupo de animales de acuerdo a su phylum.
 
-Los ficheros necesarios para realizar la práctica los podéis descargar de la página del curso en Aula Digital.
-
 #### Respuesta
+
+##### Introducción
+
+El escalamiento multidimensional (MDS) se basa en representar los datos de una matriz de datos $X \in \mathcal{M}^{n \times p}$ a partir de la matriz $D \in \mathcal{M}^{n \times n}$ de distancias o disimilitudes entre individuos (no entre las variables). El objetivo es graficar la información de forma que las coordenadas en nuestra representación mantengan las mismas distancias (euclídeas) que en $D$. Notamos que $D$ puede haber sido calculada con cualquier distancia, no solo la euclídea.
+
+Por tanto, la filosofía de este método es representar la información no proyectàndola de forma que los puntos estén más dispersos (ACP), sinó mostrando en menor dimensión lo diferentes o similares que són las unidades de observación. Una ventaja que tiene este método ante el ACP es que permite representar objetos más abstractos como grafos, donde no está clara una forma objetiva de cuantificarlos.
+
+##### Procedimiento
+
+La distancia entre dos unidades de observación es
+
+$$
+d_{ij}^2 = \sum_{k=1}^p (x_{ik} - x_{jk})^2 = \sum_k x_{ik}^2 + \sum_k
+x_{jk}^2 - 2 \sum_k x_{ik}x_{jk}
+$$ Por tanto, la distancia euclídea está relacionada con los productos de unidades de observación, es decir con la matriz $Q = XX^t$, que no es la matriz de covarianzas ($S = \dfrac{1}{n}X^tX$). El primer paso del método será por tanto representar $Q$ en función de $D$ mediante la relación $d_{ij}^2 = q_{ii} + q_{jj} - 2q_{ij}$.
+
+Una vez obtenida la matriz $Q$, entonces el objetivo es recuperar la matriz $X$ a partir de esta, o almenos una matriz $Z$ que mantenga que $Q = ZZ^t$. Diremos coordenadas principales $Z_1, \dots, Z_r$, con $r \leq n$, columnas de $Z \in \mathcal{M}^{n \times r}$.
+
+Para ello, usaremos la descomposición espectral de $Q$ en valores propios no nulos, $Q = V \Lambda V^t = (V \Lambda^{\frac{1}{2}})(V \Lambda^{\frac{1}{2}})^t = ZZ^t$, donde $V \in \mathcal{M}^{n \times r}$ y $\Lambda \in \mathcal{M}^{r \times r}$ (cogemos los $r$ valores propios más grandes y suponemos que los demás son nulos). $Z = V \Lambda^{\frac{1}{2}}$ es la matriz que buscábamos, a partir de la cual representamos gráficamente las coordenadas de cada individuo.
+
+##### Ejercicio
+
+Una vez explicado el procedimiento, nos disponemos a realizar los cálculos con R. En primer lugar, leemos la información y la introducimos como matrices.
 
 ```{r}
 # cargamos datos
@@ -158,7 +179,19 @@ phylum_levels = levels(as.factor(phylum))
 
 # Guardamos para colorear (vector)
 phylum <- as.factor(phylum)
+
+dim(matriz_datosVH)
 ```
+
+La función en R para aplicar el método MDS es $\texttt{cmdscale(d, k, eig=FALSE)}$, donde $d$ es una distancia y $k$ es la dimensión en la que queremos representar la información. En nuestro caso, los kernels de grafos son matrices $Q$ de similaridades donde $q_{ii} = 1$, $q_{ij} = q_{ji}$ y $0 \leq q_{ij} < 1$. Por lo tanto, para poder aplicar el método, necesitamos definir una distancia a partir de estas.
+
+De la igualdad $d_{ij}^2 = q_{ii} + q_{jj} - 2q_{ij}$ imponiendo $q_{ii} = q_{jj} = 1$ obtenemos $d_{ij}^2 = 2(1 - q_{ij})$, de donde
+
+$$
+d_{ij} = \sqrt{2(1 - q_{ij})}
+$$
+
+Es una distancia.
 
 ```{r}
 #pasamos de similitudes a distancia
@@ -177,8 +210,7 @@ phylum_names <- c(
   "101" = "Vertebrates",
   "102" = "Lancelet",
   "103" = "Ascidians",
-  "1
-  04" = "Echinoderms",
+  "104" = "Echinoderms",
   "105" = "Hemichordates",
   "106" = "Arthropods",
   "107" = "Nematodes",
@@ -191,12 +223,14 @@ phylum_names <- c(
   "114" = "Poriferans"
 )
 
-# Convertir tus códigos a nombres reales:
+#Tratamos los nombres como un factor
 phylum_real <- factor(phylum_names[as.character(phylum)])
 
 # colores
 colors <- rainbow(length(levels(phylum_real)))
 ```
+
+Finalmente, representamos los gráficos de las relaciones entre grafos.
 
 ```{r}
 coordsVH <- cmdscale(as.dist(distVH), k = 2)
@@ -216,6 +250,8 @@ legend("topright",
        cex = 0.8)
 ```
 
+En este primer gráfico no es sencillo discernir una diferencia clara entre la mayoría de los grupos, si bien es bien que los vertebrados y los artrópodos están bastante alejados de las otras clases de seres vivos. Esto quiere decir que la diferencia por comparación de si tienen conexiones metabólicas (nodos) parecidas o no, sin tener en cuenta la relación que estas tienen entre ellas, no es suficiente para discernir la mayoría de seres vivos pero sí en algunos en concreto.
+
 ```{r}
 coordsSP <- cmdscale(as.dist(distSP), k = 2)
 y1 <- coordsSP[,1]
@@ -234,6 +270,8 @@ legend("topright",
        cex = 0.8)
 ```
 
+En este segundo gráfico se aprecia mejor la diferencia mencionada entre artrópodos y vertebrados del resto de individuos. Esto es debido a que ahora se comparan las distancias entre nodos, es decir, cuanto similar es una conexión metabólica de la otra en un individuo. Aún así no parece haber una diferencia clara entre las demás observaciones.
+
 ```{r}
 coordsPM <- cmdscale(as.dist(distPM), k = 2)
 y1 <- coordsPM[,1]
@@ -251,6 +289,8 @@ legend("topright",
        pch = 19,
        cex = 0.8)
 ```
+
+En este útlimo gráfico se vuelve a poner en evidencia lo ya mencionado en los dos anteriores. Notamos que los tres Kernels son capaces de discernir entre artrópodos y vertebrados de las demás observaciones pero no parecen diferenciar del todo entre otras clases de seres vivos. Esto podría ser debido a la cantidad de datos de estos dos grupos respecto a los demás, de modo que un aumento en el número total de observaciones podría indicar otras conclusiones.
 
 ## Problema 4
 
