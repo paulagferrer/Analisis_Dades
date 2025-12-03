@@ -150,7 +150,10 @@ La distancia entre dos unidades de observación es
 $$
 d_{ij}^2 = \sum_{k=1}^p (x_{ik} - x_{jk})^2 = \sum_k x_{ik}^2 + \sum_k
 x_{jk}^2 - 2 \sum_k x_{ik}x_{jk}
-$$ Por tanto, la distancia euclídea está relacionada con los productos de unidades de observación, es decir con la matriz $Q = XX^t$, que no es la matriz de covarianzas ($S = \dfrac{1}{n}X^tX$). El primer paso del método será por tanto representar $Q$ en función de $D$ mediante la relación $d_{ij}^2 = q_{ii} + q_{jj} - 2q_{ij}$.
+
+$$ 
+Por tanto, la distancia euclídea está relacionada con los productos de unidades de observación, es decir con la matriz $Q = XX^t$, que no es la matriz de covarianzas ($S = \dfrac{1}{n}X^tX$). El primer paso del método será por tanto representar $Q$ en función de $D$ mediante la relación $d_{ij}^2 = q_{ii} + q_{jj} - 2q_{ij}$.
+
 
 Una vez obtenida la matriz $Q$, entonces el objetivo es recuperar la matriz $X$ a partir de esta, o almenos una matriz $Z$ que mantenga que $Q = ZZ^t$. Diremos coordenadas principales $Z_1, \dots, Z_r$, con $r \leq n$, columnas de $Z \in \mathcal{M}^{n \times r}$.
 
@@ -250,7 +253,8 @@ legend("topright",
        cex = 0.8)
 ```
 
-En este primer gráfico no es sencillo discernir una diferencia clara entre la mayoría de los grupos, si bien es bien que los vertebrados y los artrópodos están bastante alejados de las otras clases de seres vivos. Esto quiere decir que la diferencia por comparación de si tienen conexiones metabólicas (nodos) parecidas o no, sin tener en cuenta la relación que estas tienen entre ellas, no es suficiente para discernir la mayoría de seres vivos pero sí en algunos en concreto.
+En este primer gráfico no es sencillo discernir una diferencia clara entre la mayoría de los grupos, si bien es bien que los vertebrados y los artrópodos están bastante alejados de las otras clases de seres vivos. Esto quiere decir que la diferencia por comparación de si tienen conexiones metabólicas (nodos) parecidas o no, sin tener en cuenta la relación que estas tienen entre ellas, no es suficiente para discernir la mayoría de seres vivos pero sí en algunos en concreto. 
+
 
 ```{r}
 coordsSP <- cmdscale(as.dist(distSP), k = 2)
@@ -289,7 +293,6 @@ legend("topright",
        pch = 19,
        cex = 0.8)
 ```
-
 En este útlimo gráfico se vuelve a poner en evidencia lo ya mencionado en los dos anteriores. Notamos que los tres Kernels son capaces de discernir entre artrópodos y vertebrados de las demás observaciones pero no parecen diferenciar del todo entre otras clases de seres vivos. Esto podría ser debido a la cantidad de datos de estos dos grupos respecto a los demás, de modo que un aumento en el número total de observaciones podría indicar otras conclusiones.
 
 ## Problema 4
