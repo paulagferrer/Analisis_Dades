@@ -1,5 +1,6 @@
 # Analisis_Dades
 Proyectos de la asignatura de Análisis de Datos Multivariante:
+
     Introducción al diseño muestral.
     Métodos de muestreo probabilístico y no probabilístico.
     Diseño de encuestas.
