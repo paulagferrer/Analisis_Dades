@@ -20,6 +20,7 @@ library("factoextra")
 library("ggplot2")
 library("GGally")
 library("cluster")
+library("dplyr")
 ```
 
 **Una consultora especializada en evaluación y gobernanza de sistemas de Inteligencia Artificial (IA) ha recopilado información de 240 organizaciones pertenecientes a los sectores de Salud y Educación que han incorporado sistemas de IA para apoyar la toma de decisiones y la automatización de procesos.**
@@ -54,6 +55,8 @@ library("cluster")
 
 ```{r,warning=FALSE}
 datos = read.csv("datos_taller_evaluado_2.csv")
+head(datos)
+tail(datos)
 ```
 
 #### 1. Realizad un análisis exploratorio multivariante del conjunto de datos. Para ello presentad e interpretad cada uno de los gráficos solicitados a continuación, relacionándolos con el contexto del problema y destacando los patrones, asociaciones o diferencias relevantes que aporten información útil para comprender el uso de la IA en los distintos sectores (1 punto)
@@ -67,10 +70,24 @@ datos = read.csv("datos_taller_evaluado_2.csv")
     datosSelecion = datos %>%
       select(Precision, Robustez, Productividad, Ahorro_tiempo, Aceptacion_usuarios, Sector)
 
-    ggpairs(datosSelecion, aes(colors=Sector, alpha=0.6))
+    ggpairs(datosSelecion, 
+            columns = which(sapply(datosSelecion, is.numeric)),
+            aes(colors=Sector, alpha=0.3),
+            upper = list( continuous = wrap( "cor", size=2, digits =2)))
     ```
 
 -   **Una matriz de gráficos de dispersión que incluya las correlaciones entre las variables: `Riesgo_etico`, `Riesgo_legal` y `Coste` por `Sector`**
+
+    ```{r, warning=FALSE}
+
+    datosSelecion2 = datos %>%
+      select(Riesgo_etico, Riesgo_legal, Sector)
+
+    ggpairs(datosSelecion2, 
+            columns = which(sapply(datosSelecion2, is.numeric)),
+            aes(colors=Sector, alpha=0.3),
+            upper = list( continuous = wrap( "cor", size=3, digits =2)))
+    ```
 
 #### 2. Considerad el vector multivariante $\mathbf{Y}$, definido a continuación, para llevar a cabo el contraste de comparación de medias entre los sectores Educación y Salud, tal y como se especifica más adelante.
 
@@ -93,6 +110,64 @@ $$
 ##### b. Escribid un código en R que implemente el contraste de comparación de medias multivariantes apropiado entre los sectores Educación y Salud para las variables consideradas. El código debe calcular y mostrar el vector de medias muestrales de cada sector; ejecutar el contraste. Luego, reportad el p-valor y tomar una decisión para $\alpha=0.05$ en el contexto del problema (2 puntos)
 
 #### 3. Representad de manera reducida los perfiles multivariantes del uso de IA del sector Educación y del sector Salud (por separado). Interpretad las componentes retenidas, explicando su posible significado práctico en el contexto del problema. Justificad bien el procedimiento (3 puntos)
+
+```{r}
+#pca sector educacion
+datosEdu = datos %>% filter(Sector == "Educación") %>% select(Precision, Robustez, Productividad, Ahorro_tiempo, Aceptacion_usuarios,Riesgo_etico, Riesgo_legal, Coste)  
+#head(datosEdu)
+pca_edu = prcomp(datosEdu, scale = TRUE)
+summary(pca_edu)
+
+#grafico codo
+fviz_eig(pca_edu, addlabels = TRUE, ylim=c(0,100))
+# cogemos las dos primeras dimesiones para obtener un 81% de la informacion
+
+#grafico1
+fviz_pca_var(pca_edu, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE) 
+
+#grafico2
+fviz_pca_biplot(pca_edu, repel = TRUE,
+                col.var = "darkblue", # color para las variables
+                col.ind = "grey"  # color para las observaciones
+                )
+```
+
+Interpretación:
+
+Grafico2 = Todas las variables estan bien representadas y las que estan más juntas son las que estan más correlacionadas. Variables como Riesgo legal y etico estan muy correlacionadas y mejor representadas por la primera componente. En cambio, otras como Aceptacion, ahorro, robustez, no estan tan correlacionadas y tienen más peso sus loadings en la segunda componentes.
+
+Grafico1 = En general todas las variables contribuyen bien a las componentes principales y en cambio productividad no contribuye tanto como las demás, si tuvieramos que hacer una agrupacion por productividad no podriamos utilizar esta representacion, ya que no es muy significativa.
+
+```{r}
+#pca sector educacion
+datosSa = datos %>% filter(Sector == "Salud") %>% select(Precision, Robustez, Productividad, Ahorro_tiempo, Aceptacion_usuarios,Riesgo_etico, Riesgo_legal, Coste)  
+#head(datosEdu)
+pca_sa = prcomp(datosSa, scale = TRUE)
+summary(pca_sa)
+
+#grafico codo
+fviz_eig(pca_sa, addlabels = TRUE, ylim=c(0,100))
+# cogemos las dos primeras dimesiones para obtener un 79% aprx de la informacion
+
+#grafico1
+fviz_pca_var(pca_sa, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE) 
+
+#grafico2
+fviz_pca_biplot(pca_sa, repel = TRUE,
+                col.var = "darkblue", # color para las variables
+                col.ind = "grey"  # color para las observaciones
+                )
+```
+
+Inter:
+
+Grafico2 = como comentamos en el caso de educacion nos pasa lo mismo con las variables.
+
+Grafico1 = En general todas las variables contribuyen bien a las componentes principales y en cambio coste no contribuye tanto como las demás, si tuvieramos que hacer una agrupacion por coste no podriamos utilizar esta representacion, ya que no es muy significativa.
 
 #### 4. A continuación os presentamos dos bloques de código. Explicad de forma breve qué procedimiento estadístico se aplica en cada bloque. Después, interpretad los resultados en el contexto del problema: describid qué perfiles de uso de IA emergen en el sector Educación y en qué se diferencian entre sí. Por último, compara ambos bloques y justificad cuál de los dos resultados consideráis más adecuado para describir los perfiles (3 puntos)
 
@@ -123,19 +198,47 @@ fviz_cluster(pam_Edu, data = X_Edu_sc,
   ggtitle("Clustering PAM (Educación)")
 
 perfil <- read.csv("perfil_Edu.csv")$x
+cat("\n ===== perfiles")
 table(perfil, pam_Edu$clustering)
 ```
+
+Respuesta: Aplicamos un k-medoids y utilizamos la funcion PAM.
+
+Seleccionamos las variables numericas que nos interesan, filtradas por Educacion, las escalamos y el primer grafico que nos sale nos sirve para seleccionar el numero de clusters que podriamos hacer, en el codigo se han seleccionado 4, aunque a partir de 3 clusters la reducción en la suma total de cuadrados internos parece estabilizarse, indicando que k=3 es una buena opción. Sin embargo, si observamos perfiles, solo hay 4 componentes diferentes.
+
+Interpretación:
 
 ##### Bloque B
 
 ```{r, warning=FALSE}
 matriz_distancias <- dist(X_Edu_sc, method = "euclidean")
+
 h_cluster_average <- hclust(d = matriz_distancias, method = "average")
+
 cor(matriz_distancias, cophenetic(h_cluster_average))
+
 fviz_dend(h_cluster_average, k = 4, cex = 0.4, rect = TRUE,
           main = "Dendrograma (average) - Educación")
 average_clusters <- cutree(h_cluster_average, k = 4)
+
 table(perfil, average_clusters)
+```
+
+Respuesta: Se calcula la matriz de distancias euclídeas sobre datos estandarizados, se aplica un clustering jerárquico aglomerativo con enlace average, se evalúa su calidad mediante la correlación, se visualiza el dendrograma, se fija una partición en 4 clústeres y finalmente se interpretan los grupos en función de una variable externa de perfil.
+
+```{r}
+#bloque A
+A = table(perfil, pam_Edu$clustering)
+
+heatmap(A)
+legend("right", legend = round(seq(min(A), max(A), length.out=5), 2),
+       fill =heat.colors(5))
+
+#bloque B
+B = table(perfil, average_clusters)
+heatmap(B)
+legend("right", legend = round(seq(min(B), max(B), length.out=5), 2),
+       fill =heat.colors(5))
 ```
 
 **Instrucciones para entregar:** Un miembro del grupo deberá subir a la tarea de Aula Digital, un único archivo PDF que incluya:\
