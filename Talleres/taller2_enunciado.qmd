@@ -76,6 +76,8 @@ tail(datos)
             upper = list( continuous = wrap( "cor", size=2, digits =2)))
     ```
 
+    Como podemos ver, las correlaciones son muy significativas generalmente y en muchos casos valores proximos a 0.8, aa excepcion de Productividad\~Robustez que tiene significancia pero no muy alta. En cambio, algunas como Aceptacion\~Robustez tienen significancia en educacion pero muy baja correlacion.
+
 -   **Una matriz de gráficos de dispersión que incluya las correlaciones entre las variables: `Riesgo_etico`, `Riesgo_legal` y `Coste` por `Sector`**
 
     ```{r, warning=FALSE}
@@ -88,6 +90,8 @@ tail(datos)
             aes(colors=Sector, alpha=0.3),
             upper = list( continuous = wrap( "cor", size=3, digits =2)))
     ```
+
+Como podemos ver las unicas variables que tenemos en este caso, estan altamente correlacionadas con mucha significacion.
 
 #### 2. Considerad el vector multivariante $\mathbf{Y}$, definido a continuación, para llevar a cabo el contraste de comparación de medias entre los sectores Educación y Salud, tal y como se especifica más adelante.
 
@@ -226,20 +230,7 @@ table(perfil, average_clusters)
 
 Respuesta: Se calcula la matriz de distancias euclídeas sobre datos estandarizados, se aplica un clustering jerárquico aglomerativo con enlace average, se evalúa su calidad mediante la correlación, se visualiza el dendrograma, se fija una partición en 4 clústeres y finalmente se interpretan los grupos en función de una variable externa de perfil.
 
-```{r}
-#bloque A
-A = table(perfil, pam_Edu$clustering)
-
-heatmap(A)
-legend("right", legend = round(seq(min(A), max(A), length.out=5), 2),
-       fill =heat.colors(5))
-
-#bloque B
-B = table(perfil, average_clusters)
-heatmap(B)
-legend("right", legend = round(seq(min(B), max(B), length.out=5), 2),
-       fill =heat.colors(5))
-```
+Escogemos el bloque B, porque agrupa mejor los perfiles en cada cluster.
 
 **Instrucciones para entregar:** Un miembro del grupo deberá subir a la tarea de Aula Digital, un único archivo PDF que incluya:\
 1) los nombres de todos los integrantes, y\
