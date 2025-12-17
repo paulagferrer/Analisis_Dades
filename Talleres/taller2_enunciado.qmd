@@ -90,7 +90,45 @@ $$
 
 ##### a. ¿Qué supuestos deben cumplirse y mencionad cómo podríais verificarlos para que sea válido aplicar uno de los test estudiados en la asignatura? (1 punto)
 
+Para hacer el test de medias de dos poblaciones podemos aplicar el test de contraste de Wishard, para el cual necesitamos tener normalidad multivariante de las dos poblaciones estudiadas y estas con la misma matriz $\Sigma$ de covarianzas.
+
+Para poder comprobar la normalidad multivariante podríamos utilizar el estadístico obtenido con la distancia de Mahalanobis $U = (\bar{x} - \mu)^t\Sigma^{-1}(\bar{x} - \mu)$, que si $X$ sigue una distribución $N_p(\mu, \Sigma)$ entonces $U$ sigue una distribución $\chi^2$ con $p$ grados de libertad. En concreto representaríamos un QQ-plot para ver si los cuantiles se corresponden con la de una $\chi^2_p$. Si hay diferencias significativas rechazaríamos que sean normales multivariantes, y si se adecua a la recta de los cuantiles aceptamos que sea normal. Este test lo aplicamos a las dos poblaciones.
+
+Si son normales multivariantes, aún nos queda comprobar si las matrices de covarianzas son las mismas. Para ello, como no hemos visto ningún test numérico tendremos que recurrir al análisis descriptivo. Podemos realizar un heatmap de ambas matrices para ver cuanto de parecidas son las correlaciones dos a dos de las matrices. Si se aprecia un comportamiento similar en el heatmap respecto a la distribución de colores (casillas adyacentes, grupos de variables están más correlacionadas entre si, etc.) entonces decidimos si podemos considerar que las matrices son iguales.
+
 ##### b. Escribid un código en R que implemente el contraste de comparación de medias multivariantes apropiado entre los sectores Educación y Salud para las variables consideradas. El código debe calcular y mostrar el vector de medias muestrales de cada sector; ejecutar el contraste. Luego, reportad el p-valor y tomar una decisión para $\alpha=0.05$ en el contexto del problema (2 puntos)
+
+```{r}
+# Primero seleccionamos por Educación y por Salud y contamos el número de cada una
+datosEdu = datos %>% filter(Sector == "Educación") %>% select(Precision, Robustez, Productividad, Ahorro_tiempo, Aceptacion_usuarios, Riesgo_etico, Riesgo_legal, Coste)
+nEdu = as.numeric(count(datosEdu))
+
+datosSa = datos %>% filter(Sector == "Salud") %>% select(Precision, Robustez, Productividad, Ahorro_tiempo, Aceptacion_usuarios, Riesgo_etico, Riesgo_legal, Coste)
+nSa = as.numeric(count(datosSa))
+
+# El número de variables
+p = ncol(datosEdu)
+
+# Medias y Varianzas mostrales
+EduMean = datosEdu %>% colMeans() %>% as.matrix()
+EduMean
+SaMean = datosSa %>% colMeans() %>% as.matrix()
+SaMean
+Shat = ((nEdu - 1)*cov(datosEdu) + (nSa - 1)*cov(datosSa))/(nEdu + nSa - 2)
+
+# Estadístico de contraste
+
+m = (nEdu + nSa - 1 - p)*nEdu*nSa/((nEdu + nSa -2)*p*(nEdu + nSa))
+FEstadistico = m * t(EduMean - SaMean) %*% solve(Shat) %*% (EduMean - SaMean) %>% as.numeric()
+FEstadistico
+
+# Calculamos el p-valor
+
+p_valor = 1 - pf(FEstadistico, p, nEdu + nSa - 1 - p)
+p_valor
+```
+
+Como el p-valor es numéricamente 0, entonces es muy pequeño en comparación a nuestro $\alpha$, de modo que rechazamos la hipótesis que los vectores de medias sean iguales.
 
 #### 3. Representad de manera reducida los perfiles multivariantes del uso de IA del sector Educación y del sector Salud (por separado). Interpretad las componentes retenidas, explicando su posible significado práctico en el contexto del problema. Justificad bien el procedimiento (3 puntos)
 
