@@ -1,0 +1,148 @@
+---
+title: "Taller evaluado II"
+date: "2025-10-17"
+format:
+  html:
+    toc: true
+    toc-depth: 5
+lang: es
+---
+
+**Nombre y apellido de cada miembro del grupo**
+
+-   Paula Gª Ferrer
+-   Josep Cifre
+-   Marc Escandell
+
+```{r,warning=FALSE, message=FALSE, echo=FALSE}
+library("tidyverse")
+library("factoextra")
+library("ggplot2")
+library("GGally")
+library("cluster")
+```
+
+**Una consultora especializada en evaluación y gobernanza de sistemas de Inteligencia Artificial (IA) ha recopilado información de 240 organizaciones pertenecientes a los sectores de Salud y Educación que han incorporado sistemas de IA para apoyar la toma de decisiones y la automatización de procesos.**
+
+**Para cada organización se ha medido:**
+
+-   `ID`: Identificador único de la organización/entidad observada.
+
+-   `Sector`: Sector al que pertenece la organización (Salud o Educación).
+
+-   `Implementacion`: Estado de despliegue de la solución de IA (Piloto o Producción).
+
+-   `Precision`: Precisión del sistema en escala 0–100 (a mayor valor, mejor).
+
+-   `Robustez`: Estabilidad del sistema ante cambios/ruido/datos distintos en escala 0–100 (a mayor valor, más robusto).
+
+-   `Productividad`: Ganancia o nivel de productividad asociado al uso de IA en escala 0–100 (a mayor valor, mejor).
+
+-   `Ahorro_tiempo`: Ahorro de tiempo atribuible a la IA en escala 0–100 (a mayor valor, más ahorro).
+
+-   `Riesgo_etico`: Nivel de riesgo ético percibido en escala 0–100 (a mayor valor, más riesgo).
+
+-   `Riesgo_legal`: Nivel de riesgo legal/regulatorio percibido en escala 0–100 (a mayor valor, más riesgo).
+
+-   `Aceptacion_usuarios`: Grado de aceptación por parte de usuarios finales en escala 0–100 (a mayor valor, más aceptación).
+
+-   `Coste`: Coste relativo del proyecto/solución en escala 0–100 (a mayor valor, mayor coste).
+
+**El objetivo del estudio es comprender patrones de adopción, similitudes entre organizaciones y posibles diferencias sistemáticas entre grupos.**
+
+**Los datos están disponibles en el archivo: "datos_taller_evaluado_2.csv"**
+
+```{r,warning=FALSE}
+datos = read.csv("datos_taller_evaluado_2.csv")
+```
+
+#### 1. Realizad un análisis exploratorio multivariante del conjunto de datos. Para ello presentad e interpretad cada uno de los gráficos solicitados a continuación, relacionándolos con el contexto del problema y destacando los patrones, asociaciones o diferencias relevantes que aporten información útil para comprender el uso de la IA en los distintos sectores (1 punto)
+
+-   **Una matriz de gráficos de dispersión que incluya las correlaciones entre las variables: `Precisión`, `Robustez`, `Productividad`, `Ahorro_tiempo` y `Aceptacion_usuarios`por `Sector`**
+
+    Respuesta:
+
+    ```{r, warning=FALSE}
+
+    datosSelecion = datos %>%
+      select(Precision, Robustez, Productividad, Ahorro_tiempo, Aceptacion_usuarios, Sector)
+
+    ggpairs(datosSelecion, aes(colors=Sector, alpha=0.6))
+    ```
+
+-   **Una matriz de gráficos de dispersión que incluya las correlaciones entre las variables: `Riesgo_etico`, `Riesgo_legal` y `Coste` por `Sector`**
+
+#### 2. Considerad el vector multivariante $\mathbf{Y}$, definido a continuación, para llevar a cabo el contraste de comparación de medias entre los sectores Educación y Salud, tal y como se especifica más adelante.
+
+$$
+\mathbf{Y}=
+\begin{aligned}[t]
+(&\texttt{Precision},\ \texttt{Robustez},\ \texttt{Productividad},\ \texttt{Ahorro\_tiempo},\ \texttt{Aceptacion\_usuarios},\\
+ &\texttt{Riesgo\_etico},\ \texttt{Riesgo\_legal},\ \texttt{Coste})
+\end{aligned}
+$$
+
+$$
+H_0:\ \boldsymbol{\mu}_{\text{Edu}}=\boldsymbol{\mu}_{\text{Salud}}
+\qquad \text{frente a} \qquad
+H_1:\ \boldsymbol{\mu}_{\text{Edu}}\neq \boldsymbol{\mu}_{\text{Salud}}.
+$$
+
+##### a. ¿Qué supuestos deben cumplirse y mencionad cómo podríais verificarlos para que sea válido aplicar uno de los test estudiados en la asignatura? (1 punto)
+
+##### b. Escribid un código en R que implemente el contraste de comparación de medias multivariantes apropiado entre los sectores Educación y Salud para las variables consideradas. El código debe calcular y mostrar el vector de medias muestrales de cada sector; ejecutar el contraste. Luego, reportad el p-valor y tomar una decisión para $\alpha=0.05$ en el contexto del problema (2 puntos)
+
+#### 3. Representad de manera reducida los perfiles multivariantes del uso de IA del sector Educación y del sector Salud (por separado). Interpretad las componentes retenidas, explicando su posible significado práctico en el contexto del problema. Justificad bien el procedimiento (3 puntos)
+
+#### 4. A continuación os presentamos dos bloques de código. Explicad de forma breve qué procedimiento estadístico se aplica en cada bloque. Después, interpretad los resultados en el contexto del problema: describid qué perfiles de uso de IA emergen en el sector Educación y en qué se diferencian entre sí. Por último, compara ambos bloques y justificad cuál de los dos resultados consideráis más adecuado para describir los perfiles (3 puntos)
+
+##### Bloque A
+
+```{r}
+datos <- read.csv("datos_taller_evaluado_2.csv")
+vars <- c("Precision","Robustez","Productividad",
+          "Ahorro_tiempo","Aceptacion_usuarios",
+          "Riesgo_etico","Riesgo_legal","Coste")
+
+X_Edu <- datos %>%
+  filter(Sector == "Educación") %>%
+  select(all_of(vars)) %>%
+  as.data.frame()
+
+X_Edu_sc   <- scale(X_Edu)
+fviz_nbclust(X_Edu_sc, FUNcluster = cluster::pam, method = "wss") +
+  ggtitle("PAM - WSS (Educación)")
+
+set.seed(123)
+pam_Edu <- cluster::pam(X_Edu_sc, k = 4) 
+pam_Edu
+
+fviz_cluster(pam_Edu, data = X_Edu_sc, 
+             ellipse.type = "t", repel = TRUE) +
+  theme_bw() + theme(legend.position = "none") +
+  ggtitle("Clustering PAM (Educación)")
+
+perfil <- read.csv("perfil_Edu.csv")$x
+table(perfil, pam_Edu$clustering)
+```
+
+##### Bloque B
+
+```{r, warning=FALSE}
+matriz_distancias <- dist(X_Edu_sc, method = "euclidean")
+h_cluster_average <- hclust(d = matriz_distancias, method = "average")
+cor(matriz_distancias, cophenetic(h_cluster_average))
+fviz_dend(h_cluster_average, k = 4, cex = 0.4, rect = TRUE,
+          main = "Dendrograma (average) - Educación")
+average_clusters <- cutree(h_cluster_average, k = 4)
+table(perfil, average_clusters)
+```
+
+**Instrucciones para entregar:** Un miembro del grupo deberá subir a la tarea de Aula Digital, un único archivo PDF que incluya:\
+1) los nombres de todos los integrantes, y\
+2) un enlace al repositorio de GitHub (de cualquiera de los integrantes).
+
+El repositorio deberá contener, como mínimo:\
+- el archivo fuente `.qmd`,\
+- la salida `.html`, y\
+- un `README.md` que describa con claridad el propósito del proyecto y su estructura.
